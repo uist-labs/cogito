@@ -1,0 +1,7 @@
+# COGITO Dependencies
+# Install: pip install -r requirements.txt
+# For GPU: CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --force-reinstall
+
+llama-cpp-python>=0.2.0
+numpy>=1.24.0
+matplotlib>=3.7.0  # Optional, for visualization
