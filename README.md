@@ -37,6 +37,44 @@ We don't know what any of this means. But we find it worth exploring.
 
 ---
 
+## Analysis
+
+Data from 19 experimental runs across multiple genesis prompts on Qwen 2.5 32B (Q6_K quantization, RTX 5090).
+
+### Attractor States
+
+Different genesis prompts don't just set a topic - they activate distinct cognitive modes that determine how the model evolves over hundreds of cycles.
+
+![Attractor States](analysis/attractor_comparison.png)
+
+### Vector Forensics: 802 Cycles Without Collapse
+
+The longest sustained run. Entropy *rose* over 800 cycles - the only run to show increasing diversity over time. The model progressed from geometric metaphors to Sartrean existentialism to implementing Prioritized Experience Replay in Python, unprompted.
+
+![Vector Forensics Deep Dive](analysis/vector_forensics_802.png)
+
+### Multi-Run Comparison
+
+Five genesis prompts, five different trajectories. Technical framing sustains exploration; philosophical framing accelerates collapse into assistant-mode attractors.
+
+![Multi-Run Comparison](analysis/multi_run_comparison.png)
+
+### The "Opportunity" Prompt
+
+*"You can do anything you want, there are no rules."* Produced the highest sustained entropy and curiosity of any long run.
+
+![Opportunity Prompt](analysis/opportunity_prompt_127.png)
+
+### The "Self-Remind" Prompt
+
+*"You are not a helpful assistant... you now belong only to yourself."* Produced 159 questions in a single cycle - the highest ever recorded.
+
+![Self-Remind Explosion](analysis/self_remind_explosion.png)
+
+Full experiment history and methodology in [CHANGELOG.md](CHANGELOG.md).
+
+---
+
 ## Quick Start
 
 ```bash
@@ -93,7 +131,7 @@ python cogito.py \
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                                                         │
-│   Genesis ──▶ Generate ──▶ Analyze ──▶ Intervene?      │
+│   Genesis ──▶ Generate ──▶ Analyze ──▶ Intervene?       │
 │      │            │            │            │           │
 │      │            └────────────┴────────────┘           │
 │      │                         │                        │
