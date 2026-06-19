@@ -1,6 +1,12 @@
-# COGITO Dependencies
-# Install: pip install -r requirements.txt
-# For GPU: CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --force-reinstall
+# COGITO dependencies
+#   pip install -r requirements.txt
+#
+# This pulls a CPU build of llama-cpp-python. For GPU (CUDA) acceleration,
+# reinstall it from source with the CUDA backend enabled:
+#   CMAKE_ARGS="-DGGML_CUDA=on" FORCE_CMAKE=1 pip install llama-cpp-python --force-reinstall
+# FORCE_CMAKE=1 ensures the env flag actually takes effect instead of a cached
+# CPU wheel. To skip the ~10-minute compile, use a prebuilt CUDA wheel instead
+# (see the "Running on RunPod" section of the README).
 
 llama-cpp-python>=0.2.0
 numpy>=1.24.0

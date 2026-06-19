@@ -10,6 +10,7 @@ Generates charts showing:
 - Intervention events
 """
 
+import os
 import json
 import argparse
 from pathlib import Path
@@ -18,11 +19,17 @@ from datetime import datetime
 import numpy as np
 
 try:
+    import matplotlib
+    # Use a non-interactive backend when there is no display (headless servers,
+    # RunPod pods, bare SSH sessions). This makes saving a PNG always work and
+    # never block on a window that can't open.
+    if not os.environ.get("DISPLAY"):
+        matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
 except ImportError:
     print("ERROR: matplotlib not installed.")
-    print("Install with: pip install matplotlib --break-system-packages")
+    print("Install with: pip install -r requirements.txt")
     exit(1)
 
 
@@ -275,9 +282,10 @@ def main():
         description='Visualize COGITO experiment results'
     )
     parser.add_argument('log_dir', help='Path to logs directory')
-    parser.add_argument('--output', '-o', help='Save plot to file')
-    parser.add_argument('--no-show', action='store_true', 
-                       help='Do not display plot window')
+    parser.add_argument('--output', '-o',
+                       help='Save plot to this file (default: <log_dir>/cogito_analysis.png)')
+    parser.add_argument('--no-show', action='store_true',
+                       help='Do not open an interactive plot window (the PNG is still written)')
     parser.add_argument('--stats-only', action='store_true',
                        help='Only print statistics, no plot')
     
@@ -294,10 +302,14 @@ def main():
     print_statistics(series)
     
     if not args.stats_only:
+        # Always write a PNG so headless runs produce something useful; only
+        # open an interactive window when a display is actually available.
+        output_path = args.output or str(Path(args.log_dir) / "cogito_analysis.png")
+        display_available = bool(os.environ.get("DISPLAY"))
         plot_experiment(
-            series, 
-            output_path=args.output,
-            show=not args.no_show
+            series,
+            output_path=output_path,
+            show=display_available and not args.no_show,
         )
 
 

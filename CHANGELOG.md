@@ -4,6 +4,39 @@ All notable discoveries and changes to COGITO.
 
 ---
 
+## [Unreleased]
+
+### Onboarding & usability cleanup
+
+Lower the friction to a first run. No change to the pondering engine's behavior.
+
+- **Fixed the CUDA build flag** in the README, `setup.sh`, and the in-app error
+  message: `-DLLAMA_CUDA=on` → `-DGGML_CUDA=on`. The old name is ignored by
+  current `llama-cpp-python` and silently produced CPU-only builds. Added
+  `FORCE_CMAKE=1` so the flag actually takes effect.
+- **Fixed an internally inconsistent context default.** The CLI defaulted
+  `--context-size` to 4096 while the rolling context budget targeted 12000
+  tokens, so a default run overflowed the model's context and broke partway
+  through. The rolling window now auto-derives from and is clamped to `n_ctx`,
+  the default context size matches the documented 16384, and a new
+  `--rolling-window-tokens` flag exposes the budget.
+- **Made the `llama_cpp` import lazy** so `--help` and the visualizers work
+  without the (GPU-specific) inference dependency installed.
+- **Unified the install path** on a virtualenv + `requirements.txt`; dropped the
+  `--break-system-packages` advice. `setup.sh` rewritten to match and to point
+  at prebuilt GPU wheels.
+- **Added a "Running on RunPod" guide** — prebuilt CUDA wheels and a from-source
+  path, plus headless/tmux notes.
+- **Headless-safe visualizers** — they select a non-interactive backend when
+  there's no display and always write a PNG.
+- **Added a zero-GPU synthetic demo** (`examples/demo_run` + `examples/generate_demo_data.py`)
+  so the visualizers can be tried with no model and no GPU. Clearly labeled
+  synthetic.
+- Corrected the file-header date (2025 → 2026) and the stated Python floor
+  (3.8 → 3.9, matching the `tuple[...]` annotation the code already uses).
+
+---
+
 ## [0.2.0] - 2026-02-03
 
 ### Multi-Run Analysis & New Genesis Prompts

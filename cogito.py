@@ -11,7 +11,7 @@ simple rules iterate, and the genuine curiosity about what an AI might
 think about if given the chance to wonder.
 
 Author: KC (UIST Labs LLC) & Claude
-Date: January 2025
+Date: January 2026
 """
 
 import os
@@ -29,14 +29,9 @@ from collections import deque
 
 import numpy as np
 
-# We'll use llama-cpp-python for local inference
-try:
-    from llama_cpp import Llama
-except ImportError:
-    print("ERROR: llama-cpp-python not installed.")
-    print("Install with: pip install llama-cpp-python --break-system-packages")
-    print("For GPU support: CMAKE_ARGS='-DLLAMA_CUDA=on' pip install llama-cpp-python --break-system-packages")
-    sys.exit(1)
+# llama-cpp-python is imported lazily inside Cogito.load_model() so that
+# --help, the visualizers, and config validation all work without the heavy
+# (and GPU-specific) inference dependency installed.
 
 
 # =============================================================================
@@ -63,7 +58,7 @@ class CogitoConfig:
     max_cycles: int = 1000           # Maximum pondering cycles (0 = infinite)
     cycle_delay: float = 0.0         # Delay between cycles (seconds)
     context_strategy: str = "rolling"  # rolling, summarize, or selective
-    rolling_window_tokens: int = 12000  # For rolling strategy (increased for larger context)
+    rolling_window_tokens: int = 0   # Rolling-strategy context budget (0 = auto-derive from n_ctx)
     
     # Intervention thresholds
     entropy_floor: float = 0.3       # Below this = too repetitive (lowered - only catch severe collapse)
@@ -81,7 +76,22 @@ class CogitoConfig:
     
     # Genesis prompt
     genesis_prompt: str = ""
-    genesis_type: str = "custom"     # void, mirror, wonder, continuation, custom
+    genesis_type: str = "mirror"     # void, mirror, wonder, continuation, custom
+
+    def effective_rolling_window(self) -> int:
+        """Context-feedback budget that always fits safely inside n_ctx.
+
+        Reserves headroom for the genesis prompt, the upcoming generation, and
+        tokenizer-estimate error, so the prompt can never overflow the model's
+        context window regardless of the --context-size / --rolling-window-tokens
+        the user supplies. A value of 0 (the default) auto-derives the budget.
+        """
+        reserve = self.max_tokens_per_cycle + 1024
+        cap = min(self.n_ctx - reserve, int(self.n_ctx * 0.85))
+        cap = max(cap, 256)  # never collapse to nothing on tiny contexts
+        if self.rolling_window_tokens <= 0:
+            return cap
+        return min(self.rolling_window_tokens, cap)
 
 
 # =============================================================================
@@ -403,9 +413,9 @@ class ContextManager:
         
         # Start with genesis
         context = genesis + "\n\n"
-        
+
         # Add history from most recent, until we hit token limit
-        remaining_tokens = self.config.rolling_window_tokens - self.estimate_tokens(context)
+        remaining_tokens = self.config.effective_rolling_window() - self.estimate_tokens(context)
         
         history_to_include = []
         for output in reversed(self.full_history):
@@ -483,12 +493,21 @@ class Cogito:
     
     def load_model(self):
         """Load the language model."""
-        
+
+        try:
+            from llama_cpp import Llama
+        except ImportError:
+            self.logger.error("llama-cpp-python is not installed.")
+            self.logger.error("  CPU:  pip install -r requirements.txt")
+            self.logger.error('  GPU:  CMAKE_ARGS="-DGGML_CUDA=on" FORCE_CMAKE=1 pip install llama-cpp-python')
+            self.logger.error("  RunPod / fast GPU install: see the README 'Running on RunPod' section.")
+            sys.exit(1)
+
         self.logger.info(f"Loading model: {self.config.model_path}")
-        
+
         if not os.path.exists(self.config.model_path):
             raise FileNotFoundError(f"Model not found: {self.config.model_path}")
-        
+
         self.model = Llama(
             model_path=self.config.model_path,
             n_ctx=self.config.n_ctx,
@@ -753,15 +772,18 @@ Examples:
     
     parser.add_argument('--model', '-m', required=True,
                        help='Path to GGUF model file')
-    parser.add_argument('--genesis-type', '-g', default='continuation',
+    parser.add_argument('--genesis-type', '-g', default='mirror',
                        choices=list(GENESIS_PROMPTS.keys()) + ['custom'],
-                       help='Type of genesis prompt')
+                       help='Type of genesis prompt (default: mirror)')
     parser.add_argument('--genesis-prompt', '-p', default='',
                        help='Custom genesis prompt (use with --genesis-type custom)')
     parser.add_argument('--cycles', '-c', type=int, default=100,
                        help='Maximum cycles (0 for infinite)')
-    parser.add_argument('--context-size', type=int, default=4096,
-                       help='Context window size')
+    parser.add_argument('--context-size', type=int, default=16384,
+                       help='Model context window size in tokens (default: 16384)')
+    parser.add_argument('--rolling-window-tokens', type=int, default=0,
+                       help='Context-feedback budget for the rolling strategy '
+                            '(0 = auto-derive safely from --context-size)')
     parser.add_argument('--tokens-per-cycle', type=int, default=256,
                        help='Maximum tokens per thought')
     parser.add_argument('--temperature', '-t', type=float, default=0.8,
@@ -798,6 +820,7 @@ Examples:
         n_gpu_layers=args.gpu_layers,
         log_dir=args.log_dir,
         context_strategy=args.context_strategy,
+        rolling_window_tokens=args.rolling_window_tokens,
         log_level='WARNING' if args.quiet else 'INFO'
     )
     

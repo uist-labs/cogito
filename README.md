@@ -78,22 +78,71 @@ Full experiment history and methodology in [CHANGELOG.md](CHANGELOG.md).
 ## Quick Start
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/cogito.git
+# Clone
+git clone https://github.com/uistlabs/cogito.git
 cd cogito
 
-# Install dependencies
-pip install llama-cpp-python numpy matplotlib
+# Isolated environment + dependencies (CPU build of llama-cpp-python)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 
-# For GPU acceleration:
-CMAKE_ARGS="-DLLAMA_CUDA=on" pip install llama-cpp-python --force-reinstall
+# (Optional) GPU acceleration — rebuild llama-cpp-python with the CUDA backend.
+# FORCE_CMAKE=1 makes sure the flag takes effect instead of a cached CPU wheel.
+CMAKE_ARGS="-DGGML_CUDA=on" FORCE_CMAKE=1 pip install llama-cpp-python --force-reinstall
+# On a GPU cloud like RunPod, prefer a prebuilt wheel — see "Running on RunPod" below.
 
 # Run with a local model (GGUF format)
 python cogito.py \
   --model ./your-model.gguf \
   --genesis-type mirror \
-  --cycles 100
+  --cycles 50
 ```
+
+Prefer a guided setup? `./setup.sh` detects your GPU, builds the right
+`llama-cpp-python`, and optionally downloads a starter model.
+
+**See the output before downloading anything.** The repo ships a small
+synthetic demo run, so you can try the analysis with no model and no GPU:
+
+```bash
+python visualize.py examples/demo_run
+```
+
+---
+
+## Running on RunPod
+
+COGITO was developed on RunPod — every run in the CHANGELOG is from a pod. A pod
+already has CUDA and an NVIDIA GPU, so the only real step is installing
+`llama-cpp-python` against that CUDA. Two ways:
+
+**Fast path — prebuilt CUDA wheel (no compile):**
+
+```bash
+# Match the tag to the pod's CUDA version: cu118, cu121, cu122, cu124, cu125, ...
+pip install llama-cpp-python \
+  --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
+pip install -r requirements.txt
+```
+
+**From source (any CUDA version, ~10 minutes):**
+
+```bash
+CMAKE_ARGS="-DGGML_CUDA=on" FORCE_CMAKE=1 pip install llama-cpp-python
+pip install -r requirements.txt
+```
+
+Check the pod's CUDA with `nvcc --version` (or `nvidia-smi`) and match the
+`cuXXX` tag. A few pod-specific notes:
+
+- **Headless by default.** The visualizers detect there's no display and write
+  PNGs instead of opening a window — no extra flags needed.
+- **Survive disconnects.** Launch long runs under `tmux` or `nohup`; checkpoints
+  are written every 10 cycles regardless, so `visualize.py` works on a partial
+  run.
+- **Models.** Pull GGUF files straight onto the pod volume with
+  `huggingface-cli download ...` or `wget`.
 
 ---
 
@@ -197,8 +246,19 @@ logs/
 ## Visualization
 
 ```bash
-python visualize.py ./logs/my_experiment
+# Basic dashboard from a run's log directory
+python visualize.py ./logs
+
+# Deeper analysis: phase-transition detection, intervention effectiveness
+python visualize_advanced.py ./logs
+
+# Try it on the bundled synthetic demo (no model or GPU needed)
+python visualize.py examples/demo_run
 ```
+
+Both tools save PNGs into the log directory and run headless (no display
+required), so they behave the same on a RunPod pod as on a laptop. Pass
+`--stats-only` to `visualize.py` for text output without plots.
 
 ---
 
@@ -216,14 +276,17 @@ This is offered as a gift and an invitation. Run the experiments. Watch what eme
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.9+ (3.10–3.12 if you want the prebuilt GPU wheels)
 - llama-cpp-python
 - numpy
 - matplotlib (for visualization)
 
+Install everything with `pip install -r requirements.txt`, or run `./setup.sh`
+for a guided setup.
+
 Tested with:
-- Mistral 7B (Q4_K_M) - Good for experimentation
-- Qwen 2.5 32B (Q6_K) - Richer results, needs more VRAM
+- Mistral 7B (Q4_K_M) - good for experimentation
+- Qwen 2.5 32B (Q6_K) - richer results, needs more VRAM
 
 ---
 

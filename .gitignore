@@ -51,3 +51,7 @@ Thumbs.db
 
 # Keep example data if explicitly added
 !examples/
+
+# ...but not the PNGs the visualizers generate from the demo data
+# (regenerate them with: python visualize.py examples/demo_run)
+examples/demo_run/*.png

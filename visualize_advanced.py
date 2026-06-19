@@ -12,13 +12,17 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 try:
+    import matplotlib
+    # Headless-safe: pick a non-interactive backend when there is no display.
+    if not os.environ.get("DISPLAY"):
+        matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     import matplotlib.gridspec as gridspec
     from matplotlib.patches import Rectangle
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
-    print("Warning: matplotlib not available. Install with: pip install matplotlib")
+    print("Warning: matplotlib not available. Install with: pip install -r requirements.txt")
 
 
 def load_all_checkpoints(log_dir: str) -> List[dict]:
