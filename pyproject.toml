@@ -39,6 +39,18 @@ cogito-viz-advanced = "visualize_advanced:main"
 Homepage = "https://github.com/uistlabs/cogito"
 Repository = "https://github.com/uistlabs/cogito"
 
+# Backend extras: pick exactly one, e.g. `uv sync --extra cpu`. Each pins
+# llama-cpp-python to its pre-built abetlen wheel index (see [tool.uv.sources] /
+# [[tool.uv.index]] below). The set mirrors cogito_backends.py, and the extras
+# are declared mutually exclusive via [tool.uv] conflicts.
+[project.optional-dependencies]
+cpu = ["llama-cpp-python>=0.3.33"]
+cu124 = ["llama-cpp-python>=0.3.33"]
+cu130 = ["llama-cpp-python>=0.3.33"]
+metal = ["llama-cpp-python>=0.3.33"]
+vulkan = ["llama-cpp-python>=0.3.33"]
+rocm72 = ["llama-cpp-python>=0.3.33"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -51,3 +63,61 @@ include = [
     "visualize_advanced.py",
     "cogito_backends.py",
 ]
+
+# --- llama-cpp-python backend wheels (abetlen pre-built index) -------------
+# llama-cpp-python is served per-backend from GitHub Pages, not PyPI. The backend
+# extras are mutually exclusive; declare that so uv resolves each independently.
+[tool.uv]
+conflicts = [
+    [
+        { extra = "cpu" },
+        { extra = "cu124" },
+        { extra = "cu130" },
+        { extra = "metal" },
+        { extra = "vulkan" },
+        { extra = "rocm72" },
+    ],
+]
+
+# Pin llama-cpp-python to the right index per backend extra. `explicit = true`
+# means an index is used only for packages explicitly routed to it (never for
+# numpy/matplotlib/etc.).
+[tool.uv.sources]
+llama-cpp-python = [
+    { index = "llama-cpu", extra = "cpu" },
+    { index = "llama-cu124", extra = "cu124" },
+    { index = "llama-cu130", extra = "cu130" },
+    { index = "llama-metal", extra = "metal" },
+    { index = "llama-vulkan", extra = "vulkan" },
+    { index = "llama-rocm72", extra = "rocm72" },
+]
+
+[[tool.uv.index]]
+name = "llama-cpu"
+url = "https://abetlen.github.io/llama-cpp-python/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "llama-cu124"
+url = "https://abetlen.github.io/llama-cpp-python/whl/cu124"
+explicit = true
+
+[[tool.uv.index]]
+name = "llama-cu130"
+url = "https://abetlen.github.io/llama-cpp-python/whl/cu130"
+explicit = true
+
+[[tool.uv.index]]
+name = "llama-metal"
+url = "https://abetlen.github.io/llama-cpp-python/whl/metal"
+explicit = true
+
+[[tool.uv.index]]
+name = "llama-vulkan"
+url = "https://abetlen.github.io/llama-cpp-python/whl/vulkan"
+explicit = true
+
+[[tool.uv.index]]
+name = "llama-rocm72"
+url = "https://abetlen.github.io/llama-cpp-python/whl/rocm72"
+explicit = true
