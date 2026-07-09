@@ -44,10 +44,10 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 # Flat single-module layout: package the top-level modules explicitly (no src/).
-# cogito_backends.py is added to this list in the backend-catalog task.
 [tool.hatch.build.targets.wheel]
 include = [
     "cogito.py",
     "visualize.py",
     "visualize_advanced.py",
+    "cogito_backends.py",
 ]
