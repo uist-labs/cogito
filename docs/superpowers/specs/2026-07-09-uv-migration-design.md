@@ -81,8 +81,9 @@ Keep the flat layout (no `src/` restructure — the engine stays put). Add:
 - `[project.scripts]`:
   - `cogito = "cogito:main"`
   - `cogito-viz = "visualize:main"`
-  - (the advanced visualizer stays reachable via `uv run python visualize_advanced.py`;
-    promoting it to an entry point is a trivial later addition if wanted.)
+  - `cogito-viz-advanced = "visualize_advanced:main"` (promoted to a first-class command
+    for discoverability/ease-of-use; `visualize_advanced.py` already has a clean `main()`,
+    so the cost is one line and no visualizer-logic change).
 - `uv.lock` committed (reproducible core env).
 - Remove `requirements.txt` (superseded by pyproject/uv.lock).
 
@@ -240,7 +241,7 @@ task, tracked separately.
 - **glibc gate on non-AL10 users** — mitigated: documented, with the source-build hatch.
 - **Curated extras list churn** as new CUDA releases land — low; single-line additions,
   and the catalog module centralizes them.
-- **Open:** exact initial curated extras set (proposed: `cpu`, `cu124`, `cu130`, `metal`,
-  `vulkan`, `rocm72`) — confirm during review.
-- **Open:** whether to promote `visualize_advanced.py` to a `cogito-viz-advanced` entry
-  point now or defer — proposed defer.
+- **Resolved (review):** initial curated extras set confirmed — `cpu`, `cu124`, `cu130`,
+  `metal`, `vulkan`, `rocm72` (adjust later if needed).
+- **Resolved (review):** `visualize_advanced.py` **promoted** to a `cogito-viz-advanced`
+  entry point now (ease-of-use → traction; trivial cost).
