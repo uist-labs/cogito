@@ -6,6 +6,32 @@ All notable discoveries and changes to COGITO.
 
 ## [Unreleased]
 
+### Modernization: uv packaging and multi-backend install
+
+Move onto uv, make installs reproducible, and embrace the full range of hardware
+llama.cpp supports.
+
+- **Adopted `uv`** (`pyproject.toml` + `uv.lock`) in place of the venv +
+  `requirements.txt` install. numpy and matplotlib are the locked pure-Python
+  core; the Python floor is now 3.10 (uv can provision the interpreter).
+- **Console entry points** `cogito`, `cogito-viz`, and `cogito-viz-advanced`
+  (run via `uv run <cmd>`), replacing `python cogito.py` / `python visualize*.py`.
+- **Multi-backend `llama-cpp-python` via uv extras.** Six mutually-exclusive
+  backends -- `cpu`, `cu124`, `cu130`, `metal`, `vulkan`, `rocm72` -- each pinned
+  to its prebuilt abetlen wheel index; install one with
+  `uv sync --extra <backend>`. A from-source path remains for older glibc or
+  unlisted backends.
+- **Backend catalog as a single source of truth** (`cogito_backends.py`, code,
+  not a runtime config file) shared by the docs and the forthcoming installer.
+- **Slimmed `setup.sh`** to a dependency-free uv bootstrap (install uv, sync the
+  core, print next steps). Removed the hardcoded model download -- see the new
+  "Getting a Model" section in the README instead.
+- **README:** added a Hardware Support matrix and a Getting a Model section, and
+  documented the backend-switch (`--reinstall-package --no-cache`) and
+  source-build (`uv sync --inexact`) uv gotchas.
+- **ASCII-only program output** -- replaced non-ASCII characters (arrows, delta,
+  up/down markers) in the CLI and visualizer output.
+
 ### Onboarding & usability cleanup
 
 Lower the friction to a first run. No change to the pondering engine's behavior.
