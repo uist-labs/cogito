@@ -149,7 +149,7 @@ def plot_phase_analysis(cycles: List[dict], transitions: List[dict], output_path
     for t in transitions:
         color = 'red' if t['type'] == 'collapse' else 'green'
         ax1.axvline(t['cycle'], color=color, linestyle='--', alpha=0.7, linewidth=2)
-        label = f"{'↓' if t['type'] == 'collapse' else '↑'} {t['cycle']}"
+        label = f"{'v' if t['type'] == 'collapse' else '^'} {t['cycle']}"
         ax1.annotate(label, (t['cycle'], max(entropies)*0.9), fontsize=8, 
                     rotation=90, ha='right')
     
@@ -357,10 +357,10 @@ def analyze_vocabulary_over_time(cycles: List[dict], window: int = 20) -> List[d
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python visualize_advanced.py <log_dir> [log_dir2] ...")
+        print("Usage: cogito-viz-advanced <log_dir> [log_dir2] ...")
         print("\nExamples:")
-        print("  python visualize_advanced.py ./logs_overnight_mirror")
-        print("  python visualize_advanced.py ./logs_mirror ./logs_wonder  # Compare runs")
+        print("  cogito-viz-advanced ./logs_overnight_mirror")
+        print("  cogito-viz-advanced ./logs_mirror ./logs_wonder  # Compare runs")
         sys.exit(1)
     
     log_dirs = sys.argv[1:]
@@ -382,7 +382,7 @@ def main():
         print(f"\nDetected {len(transitions)} phase transitions:")
         for t in transitions:
             print(f"  Cycle {t['cycle']}: {t['type']} "
-                  f"(entropy Δ={t['entropy_change']:.2f}, questions Δ={t['question_change']:.2f})")
+                  f"(entropy delta={t['entropy_change']:.2f}, questions delta={t['question_change']:.2f})")
         
         # Vocabulary analysis
         vocab_analysis = analyze_vocabulary_over_time(cycles)

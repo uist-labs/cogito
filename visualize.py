@@ -266,15 +266,15 @@ def print_statistics(series: dict):
         
         ent_first = np.mean(series['entropy'][:mid])
         ent_second = np.mean(series['entropy'][mid:])
-        print(f"  Entropy: {ent_first:.3f} → {ent_second:.3f} ({ent_second - ent_first:+.3f})")
+        print(f"  Entropy: {ent_first:.3f} -> {ent_second:.3f} ({ent_second - ent_first:+.3f})")
         
         sr_first = np.mean(series['self_reference'][:mid])
         sr_second = np.mean(series['self_reference'][mid:])
-        print(f"  Self-ref: {sr_first:.2f} → {sr_second:.2f} ({sr_second - sr_first:+.2f})")
+        print(f"  Self-ref: {sr_first:.2f} -> {sr_second:.2f} ({sr_second - sr_first:+.2f})")
         
         q_first = np.mean(series['questions'][:mid])
         q_second = np.mean(series['questions'][mid:])
-        print(f"  Questions: {q_first:.2f} → {q_second:.2f} ({q_second - q_first:+.2f})")
+        print(f"  Questions: {q_first:.2f} -> {q_second:.2f} ({q_second - q_first:+.2f})")
 
 
 def main():

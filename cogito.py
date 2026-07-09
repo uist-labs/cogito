@@ -739,7 +739,7 @@ class Cogito:
             self_trend = np.mean([m.self_reference_count for m in second_half]) - \
                         np.mean([m.self_reference_count for m in first_half])
             
-            self.logger.info(f"\nTrends (first half → second half):")
+            self.logger.info(f"\nTrends (first half -> second half):")
             self.logger.info(f"  Entropy change: {ent_trend:+.2f}")
             self.logger.info(f"  Self-reference change: {self_trend:+.2f}")
 
