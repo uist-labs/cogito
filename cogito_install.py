@@ -65,12 +65,16 @@ def _verify_and_report(key, verify_fn, out) -> bool:
         print(f"  Cause: the CUDA {major} runtime libraries are missing "
               f"(e.g. libcudart.so.{major}). The prebuilt wheel needs the CUDA runtime "
               f"on your system; the GPU driver alone is not enough.", file=out)
-        print("  Fix it either way:", file=out)
-        print("    - Install the CUDA Toolkit: "
-              "https://developer.nvidia.com/cuda-downloads", file=out)
-        print(f"    - Or the runtime pip packages:\n"
+        print("  Fix (either):", file=out)
+        print(f"    - Install the CUDA {major} Toolkit so the runtime lands on the "
+              f"system library path (simplest):\n"
+              f"        https://developer.nvidia.com/cuda-downloads", file=out)
+        print(f"    - Or, without root, install the runtime pip packages AND point the "
+              f"loader at them:\n"
               f"        uv pip install nvidia-cuda-runtime-cu{major} "
-              f"nvidia-cublas-cu{major} nvidia-cuda-nvrtc-cu{major}", file=out)
+              f"nvidia-cublas-cu{major} nvidia-cuda-nvrtc-cu{major}\n"
+              f"        export LD_LIBRARY_PATH to their .../nvidia/*/lib dirs when you "
+              f"run cogito", file=out)
         print(f"  Then re-run: cogito-install --backend {key}", file=out)
     else:
         last = detail.strip().splitlines()[-1] if detail.strip() else "unknown error"
