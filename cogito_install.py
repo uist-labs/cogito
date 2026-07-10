@@ -13,6 +13,7 @@ side effects (detection, subprocess, stdin) are injected so the flow is fully te
 import argparse
 import functools
 import importlib.util
+import shutil
 import subprocess
 import sys
 
@@ -104,12 +105,113 @@ def _sync_cmd(key, *, switching):
     return cmd
 
 
+# --- guarded source-build path ---------------------------------------------
+
+# cmake_flag -> (SDK probe tool, human label, vendor installer link). The SDK is
+# never auto-installed (privileged, driver-version-matched); we link the vendor.
+_SDK = {
+    "-DGGML_CUDA=on": ("nvcc", "the CUDA Toolkit",
+                       "https://developer.nvidia.com/cuda-downloads"),
+    "-DGGML_HIP=on": ("hipcc", "ROCm",
+                      "https://rocm.docs.amd.com/projects/install-on-linux/en/latest/"),
+    "-DGGML_VULKAN=on": ("glslc", "the Vulkan SDK",
+                         "https://vulkan.lunarg.com/sdk/home"),
+}
+
+# Package-manager -> (install prefix, build-tool package names).
+_PKGS = {
+    "dnf": ("sudo dnf install",
+            {"compiler": "gcc-c++", "cmake": "cmake", "ninja": "ninja-build"}),
+    "apt": ("sudo apt install",
+            {"compiler": "g++", "cmake": "cmake", "ninja": "ninja-build"}),
+    "brew": ("brew install", {"compiler": None, "cmake": "cmake", "ninja": "ninja"}),
+}
+
+
+def _pkg_manager(which, system):
+    if system == "Darwin" or which("brew"):
+        return "brew"
+    if which("dnf"):
+        return "dnf"
+    if which("apt-get") or which("apt"):
+        return "apt"
+    return None
+
+
+def _pkg_hint(missing_build, which, system):
+    mgr = _pkg_manager(which, system)
+    if mgr is None:
+        return None
+    prefix, names = _PKGS[mgr]
+    pkgs = [names[m] for m in missing_build if names.get(m)]
+    if not pkgs:
+        if "compiler" in missing_build and mgr == "brew":
+            return "xcode-select --install"
+        return None
+    return prefix + " " + " ".join(pkgs)
+
+
+def _preflight(cmake_flag, which):
+    """Return (missing_build_tools, missing_sdk_tuple_or_None) for a source build."""
+    missing_build = []
+    if not (which("cc") or which("gcc")) or not (which("c++") or which("g++")):
+        missing_build.append("compiler")
+    if not which("cmake"):
+        missing_build.append("cmake")
+    if not (which("make") or which("ninja")):
+        missing_build.append("ninja")
+    sdk = _SDK.get(cmake_flag)
+    missing_sdk = sdk if (sdk and not which(sdk[0])) else None
+    return missing_build, missing_sdk
+
+
+def _print_prereqs(missing_build, missing_sdk, which, system, out):
+    print("Cannot build from source yet -- missing prerequisites:", file=out)
+    if missing_build:
+        print(f"  Build tools: {', '.join(missing_build)}", file=out)
+        hint = _pkg_hint(missing_build, which, system)
+        if hint:
+            print(f"    Install:  {hint}", file=out)
+    if missing_sdk:
+        tool, label, link = missing_sdk
+        print(f"  {label} ({tool}) not found.", file=out)
+        print(f"    Install it from the vendor: {link}", file=out)
+    print("  Then re-run: cogito-install", file=out)
+
+
+def source_build(backend_key, *, runner, which, out, system=None) -> int:
+    """Build llama-cpp-python from source for a backend; always fall back to cpu.
+
+    Pre-flights the toolchain + SDK. Missing prereqs -> print exact guidance (never
+    run a privileged install ourselves) and install cpu. Build failure -> install cpu.
+    Success -> ``uv sync --inexact`` so the exact sync does not clobber the wheel.
+    """
+    be = backends.by_key(backend_key)
+    flag = be.cmake_flag
+    missing_build, missing_sdk = _preflight(flag, which)
+    if missing_build or missing_sdk:
+        _print_prereqs(missing_build, missing_sdk, which, system, out)
+        print("Falling back to the cpu backend.", file=out)
+        return runner(_sync_cmd("cpu", switching=False))
+
+    print(f"Building llama-cpp-python from source for {backend_key} "
+          f"(CMAKE_ARGS={flag}); this compiles locally and takes several minutes.",
+          file=out)
+    build = ["env", f"CMAKE_ARGS={flag}", "uv", "pip", "install", "llama-cpp-python",
+             "--reinstall-package", "llama-cpp-python", "--no-cache"]
+    if runner(build) != 0:
+        print("Source build failed; falling back to the cpu backend.", file=out)
+        return runner(_sync_cmd("cpu", switching=False))
+    return runner(["uv", "sync", "--inexact"])
+
+
 def main(argv=None, *, detect_fn=None, runner=None, input_fn=input,
-         is_installed=None, isatty=None, out=None) -> int:
+         is_installed=None, isatty=None, which=None, out=None) -> int:
     out = out or sys.stdout
     detect_fn = detect_fn or detect.detect
     is_installed = is_installed or _llama_cpp_installed
     isatty = isatty or sys.stdin.isatty
+    which = which or shutil.which
 
     parser = argparse.ArgumentParser(
         prog="cogito-install",
@@ -145,6 +247,19 @@ def main(argv=None, *, detect_fn=None, runner=None, input_fn=input,
             if not args.yes and not args.dry_run:
                 print("(non-interactive input; accepting the recommendation)", file=out)
         else:
+            # A GPU on a wheel-incompatible host: offer the source build first
+            # (never auto: it is heavy and needs a toolchain). Decline -> the menu.
+            if rec.source_build_key:
+                ans = input_fn(
+                    f"Build the GPU backend ({rec.source_build_key}) from source? "
+                    f"Needs a compiler + SDK and several minutes. [y/N]: "
+                ).strip().lower()
+                if ans in ("y", "yes"):
+                    rc = source_build(rec.source_build_key, runner=runner,
+                                      which=which, out=out, system=det.system)
+                    if rc == 0:
+                        _next_steps(out)
+                    return rc
             chosen = _choose(ordered, rec.key, input_fn, out)
 
     switching = bool(is_installed(chosen))
