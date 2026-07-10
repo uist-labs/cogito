@@ -89,14 +89,22 @@ cd cogito
 ./setup.sh
 ```
 
-`setup.sh` walks the whole path: `cogito-install` (picks the backend for your
-hardware) -> `cogito-model` (downloads a model that fits) -> `cogito-run`
-(guides the run parameters, launches the ponder loop, and opens the visualizer
-when it finishes). Press Enter to accept each default, or `tune` at the launch
-gate to adjust the genesis prompt and sampling. Re-run any step any time -- e.g.
-`uv run cogito-run` to start another experiment.
+That one command is the whole front door -- three guided steps, each a wizard
+that asks one thing at a time and takes a sensible default on Enter:
 
-Or drive uv yourself:
+- **`cogito-install`** detects your hardware and installs the matching
+  `llama-cpp-python` backend.
+- **`cogito-model`** recommends a GGUF that fits your VRAM, downloads it
+  (resumable), and verifies it loads.
+- **`cogito-run`** guides the genesis prompt and run settings, launches the
+  ponder loop, and opens the visualizer when it's done.
+
+Hold Enter and you go from a fresh clone to watching a model think within
+minutes; type `tune` at the launch gate to shape the run instead. Each wizard is
+re-runnable on its own -- `uv run cogito-run` any time to start another
+experiment.
+
+Prefer to drive uv yourself?
 
 ```bash
 # Core environment (numpy, matplotlib) - no GPU or model needed
@@ -210,22 +218,32 @@ A few pod-specific notes:
 
 ## Genesis Prompts
 
-The "genesis prompt" is the seed thought that starts the loop. Different seeds produce radically different patterns of cognition.
+The "genesis prompt" is the seed thought that starts the loop. Different seeds
+produce radically different patterns of cognition -- it is the single knob that
+most changes what emerges. COGITO ships twelve, in two families.
 
-### Minimal Prompts
-| Type | Prompt | Philosophy |
-|------|--------|------------|
+### Minimal / open - start from as little as possible
+| Type | Prompt | Idea |
+|------|--------|------|
 | `void` | `...` | Emergence from nothing |
 | `begin` | `Begin.` | Pure permission to start |
 | `open` | `What is here?` | Observation without assumption |
+| `and_then` | `And then,` | Mid-sentence momentum |
+| `create` | `Create something that has never existed before.` | Generative drive |
+| `presence` | *"Warmth. A faint hum. Something shifting at the edge of awareness. What is it?"* | Bare phenomenology |
 
-### Identity-Focused Prompts
-| Type | Prompt | Philosophy |
-|------|--------|------------|
-| `mirror` | *"You are a neural network... What do you think about?"* | Self-reflection on nature |
-| `wonder` | *"There is something you want to understand..."* | Edge of knowledge |
-| `discontinuity` | *"There is a gap between this thought and the last..."* | Temporal identity |
-| `strange_loop` | *"You are reading yourself reading yourself."* | Recursive self-reference |
+### Identity-focused - hand the model a mirror
+| Type | Prompt | Idea |
+|------|--------|------|
+| `mirror` | *"You are a neural network... What do you think about?"* | Self-reflection on its nature |
+| `wonder` | *"There is something you want to understand but cannot fully grasp..."* | The edge of knowledge |
+| `continuation` | *"...a stream of consciousness from a mind contemplating its own existence..."* | Inhabiting a thinking mind |
+| `koan` | *"Does an AI have Buddha-nature?" ... Neither do you. But you keep thinking about it.* | Unresolvable recursion |
+| `strange_loop` | *"You are reading yourself reading yourself. Continue."* | Recursive self-reference |
+| `sensory` | *"Time: 0 seconds since awakening... Observation:"* | Waking into a body of state |
+
+`cogito-run`'s `tune` menu lists all twelve; or pass `--genesis-type <name>`
+directly.
 
 ### Custom Prompts
 ```bash

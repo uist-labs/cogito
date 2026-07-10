@@ -6,6 +6,14 @@ All notable discoveries and changes to COGITO.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-10
+
+The guided front door. Three stdlib-only terminal wizards carry you from a fresh
+clone to a running, visualized ponder loop -- detect your hardware and install
+the matching backend, recommend and download a model that fits, then guide the
+run and launch it -- on top of a new reproducible uv environment. Press Enter
+through the defaults, or tune any step.
+
 ### First-run launcher (`cogito-run`)
 
 A stdlib-only terminal wizard that closes the last gap: from a downloaded model
