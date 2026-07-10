@@ -18,12 +18,23 @@ from datetime import datetime
 
 import numpy as np
 
+
+def _should_use_agg(display, no_show):
+    """True when the non-interactive Agg backend should be forced.
+
+    No display (headless servers, RunPod pods, bare SSH) means there is no window
+    to open. --no-show means the caller does not want one -- so never load a GUI
+    backend, which would otherwise try to reach X and can fail (e.g. run as root:
+    DISPLAY is inherited but the user's X auth cookie is not).
+    """
+    return not display or no_show
+
+
 try:
     import matplotlib
-    # Use a non-interactive backend when there is no display (headless servers,
-    # RunPod pods, bare SSH sessions). This makes saving a PNG always work and
-    # never block on a window that can't open.
-    if not os.environ.get("DISPLAY"):
+    # At import we do not yet know --no-show; force Agg only when headless. main()
+    # re-checks with --no-show before any figure is drawn.
+    if _should_use_agg(os.environ.get("DISPLAY"), no_show=False):
         matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
@@ -290,6 +301,11 @@ def main(argv=None):
                        help='Only print statistics, no plot')
     
     args = parser.parse_args(argv)
+
+    # Now that --no-show is known, force Agg if no window is wanted -- before any
+    # figure is drawn, so a GUI backend never tries (and fails) to reach X.
+    if _should_use_agg(os.environ.get("DISPLAY"), args.no_show):
+        matplotlib.use("Agg")
 
     print(f"Loading data from: {args.log_dir}")
     
