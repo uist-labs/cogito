@@ -748,7 +748,7 @@ class Cogito:
 # CLI INTERFACE
 # =============================================================================
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(
         description="COGITO - Autonomous AI Pondering Experiment",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -804,8 +804,8 @@ Examples:
     parser.add_argument('--quiet', '-q', action='store_true',
                        help='Reduce console output')
     
-    args = parser.parse_args()
-    
+    args = parser.parse_args(argv)
+
     config = CogitoConfig(
         model_path=args.model,
         genesis_type=args.genesis_type,

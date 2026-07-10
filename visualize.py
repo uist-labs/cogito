@@ -277,7 +277,7 @@ def print_statistics(series: dict):
         print(f"  Questions: {q_first:.2f} -> {q_second:.2f} ({q_second - q_first:+.2f})")
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(
         description='Visualize COGITO experiment results'
     )
@@ -289,8 +289,8 @@ def main():
     parser.add_argument('--stats-only', action='store_true',
                        help='Only print statistics, no plot')
     
-    args = parser.parse_args()
-    
+    args = parser.parse_args(argv)
+
     print(f"Loading data from: {args.log_dir}")
     
     checkpoints = load_all_checkpoints(args.log_dir)
