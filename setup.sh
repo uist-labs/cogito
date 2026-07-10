@@ -31,39 +31,14 @@ echo ""
 echo "Installing the core environment (no GPU or model needed) ..."
 uv sync
 
-# --- 3. Next steps ---------------------------------------------------------
+# --- 3. Hand off to the guided backend installer --------------------------
 echo ""
 echo "----------------------------------------------"
-echo "Core setup complete."
+echo "Core setup complete. Launching the backend installer..."
 echo "----------------------------------------------"
 echo ""
-echo "Try the visualizer right now - no model or GPU needed:"
-echo "  uv run cogito-viz examples/demo_run"
-echo ""
-echo "To run experiments you need (a) a backend and (b) a GGUF model."
-echo ""
-echo "(a) Install the backend that matches your hardware:"
-if backends=$(uv run python -c '
-import cogito_backends as b
-for be in b.BACKENDS:
-    print(f"      uv sync --extra {be.key:<8}  # {be.name}")
-' 2>/dev/null); then
-    printf "%s\n" "$backends"
-else
-    echo "      uv sync --extra cpu       # CPU (works everywhere)"
-    echo "      (see the backend table in README.md for the full list)"
-fi
-echo ""
-echo "    Switching backends later? Append:"
-echo "      --reinstall-package llama-cpp-python --no-cache"
-echo ""
-echo "(b) Get a GGUF model - see 'Getting a model' in README.md."
-echo ""
-echo "Then run your first experiment, for example:"
-echo "  uv run cogito --model /path/to/model.gguf --genesis-type mirror --cycles 50"
-echo ""
-echo "And analyze it:"
-echo "  uv run cogito-viz logs"
-echo ""
-echo "Full documentation: README.md"
-echo ""
+# cogito-install detects your hardware, recommends and installs the matching
+# llama-cpp-python backend, then points you at getting a model and a first run.
+# Re-run it any time with 'uv run cogito-install' (e.g. to switch backends).
+# exec hands the terminal to the wizard so its interactive prompts get the tty.
+exec uv run cogito-install

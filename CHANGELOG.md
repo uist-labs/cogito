@@ -6,6 +6,29 @@ All notable discoveries and changes to COGITO.
 
 ## [Unreleased]
 
+### Guided backend installer (`cogito-install`)
+
+A stdlib-only terminal wizard that removes the manual backend step: it detects
+your hardware, recommends the matching `llama-cpp-python` backend with its
+reasoning, and installs it -- press Enter to accept, or override.
+
+- **Hardware detection** (`cogito_detect.py`, pure and stdlib-only): NVIDIA
+  (driver, max-CUDA, compute capability), AMD/ROCm, Vulkan, Apple Silicon, and
+  glibc, each probe degrading to "unknown" rather than failing.
+- **Compute-capability backend selection.** `cu124` vs `cu130` keys off the GPU's
+  compute capability, not the driver's max-CUDA: CUDA 13 dropped pre-Turing GPUs
+  (Maxwell/Pascal/Volta, CC < 7.5), so a Pascal card (e.g. a GTX 1070) whose
+  driver advertises CUDA 13 correctly gets `cu124`.
+- **`cogito-install` entry point** with `--backend`, `--yes`, and `--dry-run`
+  flags; re-runnable to switch backends (adds the cache-busting reinstall flags
+  for you).
+- **Guarded source build** for a GPU on a wheel-incompatible host (e.g. old
+  glibc): offered, never automatic; pre-flighted for the toolchain + SDK with the
+  exact install command; always falls back to `cpu`. Never runs a privileged
+  install itself.
+- **`setup.sh` now launches the installer** after syncing the core, instead of
+  printing manual `--extra` instructions.
+
 ### Modernization: uv packaging and multi-backend install
 
 Move onto uv, make installs reproducible, and embrace the full range of hardware
