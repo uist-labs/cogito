@@ -156,3 +156,72 @@ def keys():
 def download_url(model):
     """The Hugging Face resolve URL for this model's GGUF file."""
     return HF_RESOLVE.format(repo=model.hf_repo, file=model.hf_file)
+
+
+# --- fit decision (pure: Model + memory facts -> Fit) ----------------------
+
+_MIB = 1024 * 1024
+# Multiplicative headroom over the raw weight size for KV-cache/context/compute
+# buffers. Conservative-ish; tuned against real loads in the plan's Task 7.
+HEADROOM = 1.2
+# Fit tiers that are actually runnable (cpu_oversized is allowed but excluded
+# from "recommend" and "step down" choices).
+_ACCEPTABLE = ("gpu", "partial", "cpu")
+
+
+@dataclass(frozen=True)
+class Fit:
+    """How a model fits the detected memory, plus the run-command hint.
+
+    ``gpu_layers`` is the value to pass to ``cogito --gpu-layers``: -1 for a full
+    GPU load, 0 for CPU, else an estimated partial-offload layer count.
+    """
+
+    tier: str          # "gpu" | "partial" | "cpu" | "cpu_oversized"
+    gpu_layers: int
+    reason: str
+
+
+def fit(model, detection):
+    """Classify how ``model`` fits the host's detected VRAM/RAM. Pure."""
+    need = int(model.size_bytes * HEADROOM)
+    vram_mb = detection.vram_total_mb
+    ram_mb = detection.ram_total_mb
+
+    if vram_mb:  # a GPU with reported memory
+        vram_bytes = vram_mb * _MIB
+        if need <= vram_bytes:
+            return Fit("gpu", -1, f"fits in {vram_mb} MiB VRAM")
+        layers = model.n_layers * vram_bytes // need
+        layers = max(1, min(layers, model.n_layers - 1))
+        return Fit("partial", layers,
+                   f"larger than {vram_mb} MiB VRAM; offload ~{layers}/"
+                   f"{model.n_layers} layers, the rest on CPU")
+
+    if ram_mb:
+        if need <= ram_mb * _MIB:
+            return Fit("cpu", 0, f"no GPU; runs on {ram_mb} MiB RAM")
+        return Fit("cpu_oversized", 0,
+                   f"larger than {ram_mb} MiB RAM; may be very slow or fail to load")
+
+    return Fit("cpu", 0, "memory undetected; defaulting to CPU")
+
+
+def recommended_model(catalog, detection):
+    """Pick the best default: the largest model that fits fully on the GPU, else
+    the largest that fits in RAM, else the smallest model (least bad)."""
+    gpu = [x for x in catalog if fit(x, detection).tier == "gpu"]
+    if gpu:
+        return max(gpu, key=lambda x: x.params_b)
+    cpu = [x for x in catalog if fit(x, detection).tier == "cpu"]
+    if cpu:
+        return max(cpu, key=lambda x: x.params_b)
+    return min(catalog, key=lambda x: x.params_b)
+
+
+def step_down(catalog, detection, chosen):
+    """The largest model smaller than ``chosen`` that is still runnable, or None."""
+    smaller = [x for x in catalog
+               if x.params_b < chosen.params_b
+               and fit(x, detection).tier in _ACCEPTABLE]
+    return max(smaller, key=lambda x: x.params_b) if smaller else None
