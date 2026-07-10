@@ -14,9 +14,12 @@ stays lift-ready for reuse by other GPU-backend projects -- see the design's reu
 Nothing here imports llama_cpp or performs a network/install action.
 """
 
+import platform
 import re
+import shutil
+import subprocess
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 
 @dataclass(frozen=True)
@@ -98,3 +101,80 @@ def parse_lspci_amd(text: str) -> bool:
 def parse_rocminfo_agents(text: str) -> bool:
     """True if rocminfo lists a GPU agent (a working ROCm stack, not just a GPU)."""
     return re.search(r"Device Type:\s*GPU", text) is not None
+
+
+# --- probe runners + orchestrator ------------------------------------------
+
+def _run(cmd) -> str:
+    """Run a probe command and return stdout, swallowing any failure into "".
+
+    Read-only by construction (callers only pass query commands). A missing tool,
+    nonzero exit, or timeout all degrade to "" so detection never raises.
+    """
+    try:
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=10, check=False
+        )
+        return proc.stdout
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def detect(
+    *,
+    run: Callable[[list], str] = _run,
+    which: Callable[[str], Optional[str]] = shutil.which,
+    system: Optional[str] = None,
+    machine: Optional[str] = None,
+    libc: Optional[Tuple[str, str]] = None,
+) -> Detection:
+    """Probe the host and return a Detection. Side effects are injected for testing.
+
+    ``run``/``which`` default to real subprocess/PATH lookups; tests pass fakes.
+    ``system``/``machine``/``libc`` default to the real platform values.
+    """
+    system = system or platform.system()
+    machine = machine or platform.machine()
+
+    nvidia = False
+    nvidia_driver = nvidia_max_cuda = nvidia_compute_cap = None
+    if which("nvidia-smi"):
+        smi = run(["nvidia-smi"])
+        nvidia_driver = parse_driver_version(smi)
+        nvidia_max_cuda = parse_nvidia_smi_cuda(smi)
+        # Only a genuinely working driver (banner parsed) counts as an NVIDIA host.
+        nvidia = bool(nvidia_driver or nvidia_max_cuda)
+        if nvidia:
+            nvidia_compute_cap = parse_compute_cap(
+                run(["nvidia-smi", "--query-gpu=compute_cap", "--format=csv,noheader"])
+            )
+
+    rocm_ok = False
+    if which("rocminfo"):
+        rocm_ok = parse_rocminfo_agents(run(["rocminfo"]))
+    amd_gpu = rocm_ok
+    if which("lspci"):
+        amd_gpu = amd_gpu or parse_lspci_amd(run(["lspci"]))
+    # /opt/rocm is a weaker hint than a live agent; it does not upgrade rocm_ok.
+
+    vulkan = which("vulkaninfo") is not None
+
+    if libc is None:
+        try:
+            libc = platform.libc_ver()
+        except OSError:
+            libc = ("", "")
+    glibc = parse_glibc(libc[1]) if libc and libc[1] else None
+
+    return Detection(
+        system=system,
+        machine=machine,
+        nvidia=nvidia,
+        nvidia_driver=nvidia_driver,
+        nvidia_max_cuda=nvidia_max_cuda,
+        nvidia_compute_cap=nvidia_compute_cap,
+        amd_gpu=amd_gpu,
+        rocm_ok=rocm_ok,
+        vulkan=vulkan,
+        glibc=glibc,
+    )
