@@ -68,7 +68,7 @@ class FlowTest(unittest.TestCase):
         self.assertEqual(len(run.calls), 1)
         self.assertEqual(run.calls[0],
                          launch.build_argv(str(MODEL), dict(launch.DEFAULTS), -1, LOG_DIR))
-        self.assertEqual(viz.calls, [[LOG_DIR]])
+        self.assertEqual(viz.calls, [[LOG_DIR, "--no-show"]])
 
     def test_ctrl_c_at_the_gate_cancels_cleanly_without_launching(self):
         def boom(_prompt=""):
@@ -86,7 +86,7 @@ class FlowTest(unittest.TestCase):
         out = io.StringIO()
         rc = run_main([], run_fn=run, viz_fn=viz, out=out)
         self.assertEqual(rc, 0)
-        self.assertEqual(viz.calls, [[LOG_DIR]])
+        self.assertEqual(viz.calls, [[LOG_DIR, "--no-show"]])
         self.assertIn("interrupt", out.getvalue().lower())
 
     def test_viz_failure_warns_but_run_succeeds(self):

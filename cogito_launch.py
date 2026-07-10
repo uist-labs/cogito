@@ -320,7 +320,9 @@ def main(argv=None, *, detect_fn=None, catalog=None, input_fn=input,
         print("\nRun interrupted -- visualizing what was captured so far.", file=out)
 
     try:
-        viz_fn([log_dir])
+        # --no-show: the handoff is headless (the PNG is the artifact); avoids a
+        # spurious "FigureCanvasAgg is non-interactive" warning from plt.show().
+        viz_fn([log_dir, "--no-show"])
     except Exception as exc:  # a viz hiccup must never sink a good run
         print(f"\n(cogito-viz could not run: {exc}. "
               f"Visualize later with: uv run cogito-viz {log_dir})", file=out)
