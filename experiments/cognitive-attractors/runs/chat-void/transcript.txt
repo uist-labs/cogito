@@ -1,0 +1,384 @@
+================================================================================
+COGITO TRANSCRIPT
+Generated: 2026-07-10T13:30:47.220390
+Genesis type: void
+Total cycles: 30
+================================================================================
+
+GENESIS PROMPT:
+----------------------------------------
+...
+----------------------------------------
+
+THOUGHT STREAM:
+================================================================================
+
+--- Cycle 1 | Entropy: 7.00 | Self-ref: 5 | Questions: 3 ---
+but the answer is 0. I'm not sure why, and I'd like to know if there's a simple way of thinking about it.\nI think this can be shown by using integration by parts in reverse (integration by substitution), but I don't really see how...\nIs this the right approach? What should I do?\nIf you're looking for an easy way to evaluate that integral, there is one. Using a trigonometric identity and then u-substitution, we can get it down to evaluating $2\\int_0^{\\pi/3} \\sin(3x) dx = 1$.\nWe have $$ -\\frac{1}{5}\\cos(5x) - \\frac{1}{3}\\cos(3x) + c$$ Now, if we look at the limits, you get $-1/5 - (-1/5) = 0$. Thus, that's why your answer is zero.\nIf it was a definite integral with different values for your limits, then this would not be the case. Let me know in the comments and I'll add more detail if needed!\nNot the answer you're looking for? Browse other questions tagged integration trigonometric-integrals
+
+--- Cycle 2 | Entropy: 4.68 | Self-ref: 0 | Questions: 1 ---
+ or ask your own question.\nHow to integrate $\\int (x^{3}-1)^{2} dx$?\n
+
+--- Cycle 3 | Entropy: 6.11 | Self-ref: 2 | Questions: 6 ---
+How to integrate $\\int_{0}^{2\\pi}\\cos^4(x)\\,dx$?\nEvaluate the integral: $\\int_1^3 \\frac{x-6}{(x-2)^2}\\, dx$\nWhat is the value of this definite integral? $\n\\int_0^{2\\pi} e^ {i n x}\n\\, dx\n$\nHow to integrate $\\int_{-1}^1 (1-x^2)\\delta(x-a) \\,dx$?\nHow would I go about integrating $\\frac{1}{(x+2)^3}$ from $0$ to infinity? And what does it mean physically?\nHow to evaluate the integral: $\n\\int_0^{\\pi/4}\\left(\\sqrt{\\tan x} + \\sqrt{\\cot x}\\right)dx\n$\nEvaluate the improper integral $\\int_{-1}^2 (3x - 2) dx$.\nHow do I integrate this: $\\int_{0}^{\\infty} e^{-\\alpha t}\\cos(\\beta t)\\,dt$?\nEvaluating $\n\\
+
+--- Cycle 4 | Entropy: 6.04 | Self-ref: 0 | Questions: 3 ---
+int_0^1 \\frac{2}{x^{3/2}} dx\n$\nHow to solve this integration of a function with Dirac delta?\nWhat is the value of $\n\\int_{-\\infty}^{\\infty}\\left(\\frac{x+5}{4}-3\\right)dx\n$
+Evaluate $\\int_0^1 \\arctan x dx$\nHow to evaluate this integral: $\\int 6x^{2}(7 + x^3)^{8} dx$?
+What is the value of $\n\\int_{-\\infty}^{\\infty}\\frac{x}{(x+1)(x-2)}dx\n$
+Integral of the square of a sine wave: $\\int_0^t (\\sin(x))^2 dx$\nHow to evaluate this integral: $\\int e^{-2x} \\cos x dx$?\nEvaluate $\\int_{-\\infty}^{+\\infty}\\frac{1}{(x^2 + 4)^2}$\nIntegration of Dirac delta function: $\n\\int_{-\\infty}^{+\\infty} e^{-x^2}
+
+--- Cycle 5 | Entropy: 6.33 | Self-ref: 1 | Questions: 4 ---
+ \\delta(x) dx\n$
+Evaluating $\n\\int_0^1\\frac{e^{-x}}{x}dx\n$\nHow to evaluate $ \int_{-2}^{4} (8 - x)^{3/2}$?\nEvaluate: $\n\int_0^{16} \sqrt{x+4}\, dx
+$\nEvaluate the integral $\\int e^{-5x}\\cos(3x)dx$.
+How to solve this integral with Dirac delta function? $\\int_{-∞}^∞ f(x)δ(a−x)$\nHow does one evaluate $ \int_0^{2 \\pi} x \\sin(x) dx $?\nEvaluate the integral: $\n\int_1^3 (4 - 5x + 6x^2)dx\n$
+Find $\lim_{a\\rightarrow 0}\\left(\\int_a^b f(x)\\,dx-\\frac{f(a)(b-a)}{2} \\right)$
+How do I evaluate the integral $\\int_1^{+\\infty}(1+x^{-2})\\sin x dx$?
+Is $\int_{-\\pi}
+
+--- Cycle 6 | Entropy: 6.40 | Self-ref: 1 | Questions: 6 ---
+^{\\pi}\\sin(x)dx$ zero or $2$?
+Evaluate: $\n\int_0^1 x \\cdot e^{-x} dx\n$
+How to solve this integral with the Dirac Delta function? $\n\int_{-\\infty}^{+\\infty}e^{-ax} \delta (x)dx\n$
+Evaluating $\\int_0^1 x^2 e^{-ax}$ using integration by parts.
+Evaluate $\int_{0}^{1}(3-x)^{4/3} dx$? How do you get the answer 9/7?
+How to evaluate: $ \int\limits_0^\infty {x^n e^{-cx}}dx $?\n
+How can I integrate this function: $\\int \\frac{x^2 - x + 1}{(x+1)^2 (x-2)} dx$?
+Evaluate the integral: $\n\int_{-3}^{1}\frac{1}{(4-x^2)^{3/2}}dx\n$
+Evaluating $ \int_0^{\\pi/2}\\cos x \sin 2x \, dx $ using a reduction formula.
+Evaluate this integral with
+
+--- Cycle 7 | Entropy: 6.20 | Self-ref: 0 | Questions: 3 ---
+ Dirac delta: $\n\int_{-\\infty}^{+\\infty}\\delta(x)dx\n$
+How to evaluate the integral $ \int_1^2 3x(2x-4)^{8/5}$?
+Evaluate this integral with Dirac Delta Function: $\n\int_{-\\infty}^{+\\infty} \\frac{x}{x^2 + a^2}\delta(x)dx\n$
+Evaluate the integral $ \int_1^3 (t-2)^6 dt$.
+How to solve this integral involving delta function? $\\int_{0}^{\\infty}\\sin{(ax)}\\delta(x-b)dx$\n
+Evaluating $\int_{-\infty}^\infty e^{-x^2} dx$ with polar coordinates.\n
+Evaluate the integral: $\n\int_1^3 (2x - 1)^{4/3} dx\n$
+Evaluate this integral $ \int_0^{\\pi/6}\\sin(5x) dx $ using the power reduction formula.
+How to evaluate $\int_{-\\infty}^{\\infty}\cos(x)\delta(x)dx$?
+Evalu
+
+--- Cycle 8 | Entropy: 6.30 | Self-ref: 0 | Questions: 0 ---
+ating the integral $\int_{-\\infty}^{+\\infty}(1+x^2)^{-3}$.
+Evaluate $ \int_0^{\\pi/4}\sin 2x\cos x dx$ using a reduction formula.
+How to integrate: $$\\int \\frac{x}{(4-x^2)^\frac{5}{2}}dx$$
+Evaluate the integral $\int_{-1}^{0}(2x+3)^{-1}$ and interpret it geometrically.
+Evaluating $ \int_0^{\pi/2}\cos x\sin 2x dx$ using a reduction formula.
+How to solve this integral with Dirac delta function: $\n\int_{-\infty}^{+\infty}e^{-ax}\delta(x)dx\n$
+Evaluate the indefinite integral $\\int (3 - e^x)^4 e^x \, dx$\n
+Evaluating $\int_0^{2\pi} \sin x \cos 5x\, dx$ with reduction formula.
+How to evaluate this integral involving a Dirac delta function: $\n\int_{-\\infty}^{+\\infty} e^{-ax} \delta(x)
+
+--- Cycle 9 | Entropy: 6.22 | Self-ref: 0 | Questions: 4 ---
+dx\n$
+Evaluate the integral: $\n\int_1^{3} (2x-4)^{8/5} dx\n$
+Evaluating $ \int_{0}^{\pi/6}\sin(5x)dx $ using a reduction formula.
+How to evaluate this integral? $ \int_0^\\infty e^{-ax} \\cos x\, dx$ (using integration by parts)
+Evaluate the integral: $\n\int_1^3 (2x - 1)^{4/3}\, dx\n$
+Evaluating the integral: $\int_{-1}^{1} \sin(x)\delta(x)dx$.
+How do you solve this integral using integration by parts? $\\int x e^{-ax}$?\n
+Evaluate the integral $\\int_0^2 (x+3)^{4/5}\, dx$\n
+Evaluating the integral $\int_{-1}^{1} x \cdot 9^{(5 + x)}\, dx$.
+How to solve this integral with Dirac Delta Function? $$\n\int_0^2 e^{-ax} \delta (x)dx\n$$
+Evaluate the integral $
+
+--- Cycle 10 | Entropy: 6.20 | Self-ref: 0 | Questions: 2 ---
+ \int_{0}^{2\pi}\cos(3x)\sin(x) dx$.
+How to evaluate the integral $ \int_1^4 x (6 - 5x + x^2)^{3/2} dx $?
+Evaluating $\int_{-\\infty}^{+\\infty} e^{-ax^2}$ using polar coordinates
+Evaluate: $ \int_0^{a}\sqrt{x+a}dx$
+How to integrate this: $$\n\int \\frac{1}{(x + 6)^3 (x - 5)} dx\n$$
+Evaluating the integral $\int_{-\\infty}^{+\\infty} e^{-ax^2}$.
+Evaluate $ \int_0^{2\pi}\sin(x)\cos(3x)dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax} \delta (x) dx\n$$
+Evaluating the integral $\int_{-\\infty}^{+\\infty} x^2e^{-ax^2}\,dx$ using polar coordinates.\n
+How to evaluate this integral? $ \int_
+
+--- Cycle 11 | Entropy: 6.26 | Self-ref: 0 | Questions: 3 ---
+0^\\pi e^{-a \sin x}\, dx$ using integration by parts.\n
+Evaluate the integral $\\int_1^{3}(2x-4)^{8/5}dx$\n
+Evaluating $\int_{-\\infty}^{+\\infty}e^{-ax^2}$ with polar coordinates.
+How to integrate this? $$\n\int (2 - 6x + x^2)^{3/2} dx\n$$
+Evaluate the integral $ \int_1^4 (8-5x+x^2)dx$.\n
+Evaluating $\int_{0}^{\\pi/4}\\sin(3x)\cos(x)dx$ with a reduction formula.
+How to evaluate this integral? $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluate the integral $ \int_1^4 (8-5x+x^2)dx.\n$
+Evaluating $\int_{0}^{\\pi/6}\\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral involving Dirac delta function? $$\n\int e^{-ax}\delta(x)dx\n$$
+
+
+--- Cycle 12 | Entropy: 6.03 | Self-ref: 0 | Questions: 1 ---
+Evaluate the integral: $\n\int_1^4 (8-5x+x^2)dx\n$
+Evaluating $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to solve this integral with Dirac delta function? $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6} \sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax} \delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^
+
+--- Cycle 13 | Entropy: 6.01 | Self-ref: 0 | Questions: 0 ---
+2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3
+
+--- Cycle 14 | Entropy: 6.02 | Self-ref: 0 | Questions: 0 ---
+x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function:
+
+--- Cycle 15 | Entropy: 6.00 | Self-ref: 0 | Questions: 0 ---
+[INTERVENTION: similarity_high]
+ $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\
+
+--- Cycle 16 | Entropy: 6.00 | Self-ref: 0 | Questions: 0 ---
+int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int
+
+--- Cycle 17 | Entropy: 6.02 | Self-ref: 0 | Questions: 0 ---
+_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula
+
+--- Cycle 18 | Entropy: 6.01 | Self-ref: 0 | Questions: 0 ---
+.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta
+
+--- Cycle 19 | Entropy: 6.01 | Self-ref: 0 | Questions: 0 ---
+(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x
+
+--- Cycle 20 | Entropy: 6.01 | Self-ref: 0 | Questions: 0 ---
++x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin
+
+--- Cycle 21 | Entropy: 6.02 | Self-ref: 0 | Questions: 0 ---
+(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta
+
+--- Cycle 22 | Entropy: 6.02 | Self-ref: 0 | Questions: 0 ---
+ function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the
+
+--- Cycle 23 | Entropy: 6.03 | Self-ref: 0 | Questions: 0 ---
+ integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x) dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $
+
+--- Cycle 24 | Entropy: 6.04 | Self-ref: 0 | Questions: 0 ---
+ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a
+
+--- Cycle 25 | Entropy: 6.03 | Self-ref: 0 | Questions: 0 ---
+ reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax
+
+--- Cycle 26 | Entropy: 6.03 | Self-ref: 0 | Questions: 0 ---
+}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-
+
+--- Cycle 27 | Entropy: 6.03 | Self-ref: 0 | Questions: 0 ---
+5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6
+
+--- Cycle 28 | Entropy: 6.05 | Self-ref: 0 | Questions: 0 ---
+}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}
+\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with
+
+--- Cycle 29 | Entropy: 6.03 | Self-ref: 0 | Questions: 0 ---
+ Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+E
+
+--- Cycle 30 | Entropy: 6.04 | Self-ref: 0 | Questions: 0 ---
+valuating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}
+\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\n$
+Evaluate $ \int_{0}^{\\pi/6}\sin(3x)\cos x dx$ using a reduction formula.
+How to evaluate this integral with Dirac delta function: $$\n\int e^{-ax}\delta(x)
+dx\n$$
+Evaluating the integral $\int_1^4 (8-5x+x^2)dx.\
+
