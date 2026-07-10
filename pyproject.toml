@@ -34,6 +34,7 @@ dependencies = [
 cogito = "cogito:main"
 cogito-viz = "visualize:main"
 cogito-viz-advanced = "visualize_advanced:main"
+cogito-install = "cogito_install:main"
 
 [project.urls]
 Homepage = "https://github.com/uistlabs/cogito"
@@ -62,6 +63,8 @@ include = [
     "visualize.py",
     "visualize_advanced.py",
     "cogito_backends.py",
+    "cogito_detect.py",
+    "cogito_install.py",
 ]
 
 # --- llama-cpp-python backend wheels (abetlen pre-built index) -------------
