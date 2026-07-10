@@ -14,6 +14,7 @@ stays lift-ready for reuse by other GPU-backend projects -- see the design's reu
 Nothing here imports llama_cpp or performs a network/install action.
 """
 
+import os
 import platform
 import re
 import shutil
@@ -40,6 +41,8 @@ class Detection:
     rocm_ok: bool = False                              # a ROCm GPU agent is present
     vulkan: bool = False
     glibc: Optional[Tuple[int, int]] = None
+    vram_total_mb: Optional[int] = None                # total GPU memory (MiB)
+    ram_total_mb: Optional[int] = None                 # total system RAM (MiB)
 
 
 @dataclass(frozen=True)
@@ -124,6 +127,29 @@ def parse_rocminfo_agents(text: str) -> bool:
     return re.search(r"Device Type:\s*GPU", text) is not None
 
 
+def parse_vram(text: str) -> Optional[int]:
+    """Total VRAM in MiB from ``nvidia-smi --query-gpu=memory.total`` (nounits).
+
+    Takes the first GPU's value (single-GPU is the norm). Returns None on
+    N/A/garbage/empty.
+    """
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            return int(line)
+        except ValueError:
+            return None
+    return None
+
+
+def parse_meminfo(text: str) -> Optional[int]:
+    """Total system RAM in MiB from /proc/meminfo's ``MemTotal: N kB`` line."""
+    m = re.search(r"^MemTotal:\s*(\d+)\s*kB", text, re.MULTILINE)
+    return int(m.group(1)) // 1024 if m else None
+
+
 # --- probe runners + orchestrator ------------------------------------------
 
 def _run(cmd) -> str:
@@ -141,6 +167,30 @@ def _run(cmd) -> str:
         return ""
 
 
+def _read_meminfo() -> str:
+    """Read /proc/meminfo, returning "" if it is absent (non-Linux) or unreadable."""
+    try:
+        with open("/proc/meminfo", encoding="utf-8") as f:
+            return f.read()
+    except OSError:
+        return ""
+
+
+def _ram_mb(read: Callable[[], str] = _read_meminfo, sysconf=os.sysconf) -> Optional[int]:
+    """Total system RAM in MiB: /proc/meminfo first, then a sysconf fallback.
+
+    Both sources are injected so the fallback path is testable. Any failure
+    degrades to None so detection never raises.
+    """
+    ram = parse_meminfo(read())
+    if ram is not None:
+        return ram
+    try:
+        return sysconf("SC_PAGE_SIZE") * sysconf("SC_PHYS_PAGES") // (1024 * 1024)
+    except (ValueError, OSError, TypeError):
+        return None
+
+
 def detect(
     *,
     run: Callable[[list], str] = _run,
@@ -148,6 +198,7 @@ def detect(
     system: Optional[str] = None,
     machine: Optional[str] = None,
     libc: Optional[Tuple[str, str]] = None,
+    ram_mb_fn: Optional[Callable[[], Optional[int]]] = None,
 ) -> Detection:
     """Probe the host and return a Detection. Side effects are injected for testing.
 
@@ -158,7 +209,7 @@ def detect(
     machine = machine or platform.machine()
 
     nvidia = False
-    nvidia_driver = nvidia_max_cuda = nvidia_compute_cap = None
+    nvidia_driver = nvidia_max_cuda = nvidia_compute_cap = vram_total_mb = None
     if which("nvidia-smi"):
         smi = run(["nvidia-smi"])
         nvidia_driver = parse_driver_version(smi)
@@ -169,6 +220,10 @@ def detect(
             nvidia_compute_cap = parse_compute_cap(
                 run(["nvidia-smi", "--query-gpu=compute_cap", "--format=csv,noheader"])
             )
+            vram_total_mb = parse_vram(run(
+                ["nvidia-smi", "--query-gpu=memory.total",
+                 "--format=csv,noheader,nounits"]
+            ))
 
     rocm_ok = False
     if which("rocminfo"):
@@ -187,6 +242,8 @@ def detect(
             libc = ("", "")
     glibc = parse_glibc(libc[1]) if libc and libc[1] else None
 
+    ram_total_mb = (ram_mb_fn or _ram_mb)()
+
     return Detection(
         system=system,
         machine=machine,
@@ -198,6 +255,8 @@ def detect(
         rocm_ok=rocm_ok,
         vulkan=vulkan,
         glibc=glibc,
+        vram_total_mb=vram_total_mb,
+        ram_total_mb=ram_total_mb,
     )
 
 
