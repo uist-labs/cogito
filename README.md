@@ -160,8 +160,10 @@ file - nothing is downloaded automatically.
 - **Download** with `huggingface-cli download <repo> <file.gguf>` or `wget` the
   resolve URL, then point `--model` at the file.
 
-> A guided model picker with size and VRAM-fit checks is planned for a future
-> release. For now, you choose the file.
+> **The guided picker does this for you.** `./setup.sh` (or `uv run cogito-model`
+> any time) recommends a GGUF that fits your hardware, checks free space,
+> downloads it with resume, and prints the exact run command. The manual steps
+> above remain for any model outside the curated list.
 
 ---
 

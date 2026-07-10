@@ -113,6 +113,11 @@ class TestPostInstallVerification(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("Next steps", out.getvalue())
 
+    def test_next_steps_points_at_the_model_picker(self):
+        out = io.StringIO()
+        run_wizard(["--yes"], verify=(True, ""), out=out)
+        self.assertIn("cogito-model", out.getvalue())
+
     def test_verify_failure_reports_actionable_guidance_and_nonzero(self):
         out = io.StringIO()
         code, rec = run_wizard(

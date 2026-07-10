@@ -6,6 +6,29 @@ All notable discoveries and changes to COGITO.
 
 ## [Unreleased]
 
+### Guided model picker (`cogito-model`)
+
+A stdlib-only terminal wizard that takes you from "which model?" to a downloaded,
+hardware-appropriate GGUF and a ready-to-run command -- no manual Hugging Face
+hunting.
+
+- **Curated GGUF catalog** (`cogito_models.py`, code-as-config): eight ungated
+  models spanning 0.5B-32B -- the Qwen2.5 ladder (matching the experiments in
+  this changelog) plus Mistral-7B, Phi-3.5-mini, and DeepSeek-R1-Distill-Qwen for
+  contrast. One curated quant (Q4_K_M) per entry.
+- **VRAM/RAM fit.** Detects total VRAM and system RAM and tags each model
+  "fits on GPU" / "partial offload" / "CPU (RAM)"; recommends the largest that
+  fits fully, and offers a step down the ladder when a pick does not fit.
+- **Resumable, dependency-free download** (`cogito_modeldl.py`): stdlib `urllib`
+  with HTTP Range resume, a progress bar, size (and optional sha256) verification,
+  and an atomic rename. Honors `HF_TOKEN` for gated repos, though the curated
+  catalog never needs it.
+- **Free-space precheck** before downloading; an already-present file is skipped.
+  Emits the exact `uv run cogito --model ... --gpu-layers N` command, with the
+  offload count taken from the fit.
+- **`cogito-model` entry point** with `--model`, `--dest`, `--yes`, `--dry-run`.
+  `setup.sh` now chains `cogito-install` into `cogito-model`.
+
 ### Guided backend installer (`cogito-install`)
 
 A stdlib-only terminal wizard that removes the manual backend step: it detects
@@ -26,8 +49,8 @@ reasoning, and installs it -- press Enter to accept, or override.
   glibc): offered, never automatic; pre-flighted for the toolchain + SDK with the
   exact install command; always falls back to `cpu`. Never runs a privileged
   install itself.
-- **`setup.sh` now launches the installer** after syncing the core, instead of
-  printing manual `--extra` instructions.
+- **`setup.sh` now launches the installer** after syncing the core (then chains
+  into the model picker), instead of printing manual `--extra` instructions.
 
 ### Modernization: uv packaging and multi-backend install
 

@@ -31,14 +31,23 @@ echo ""
 echo "Installing the core environment (no GPU or model needed) ..."
 uv sync
 
-# --- 3. Hand off to the guided backend installer --------------------------
+# --- 3. Guided backend install, then model picker -------------------------
 echo ""
 echo "----------------------------------------------"
-echo "Core setup complete. Launching the backend installer..."
+echo "Core setup complete. Launching the guided installer..."
 echo "----------------------------------------------"
 echo ""
-# cogito-install detects your hardware, recommends and installs the matching
-# llama-cpp-python backend, then points you at getting a model and a first run.
-# Re-run it any time with 'uv run cogito-install' (e.g. to switch backends).
-# exec hands the terminal to the wizard so its interactive prompts get the tty.
-exec uv run cogito-install
+# cogito-install detects your hardware and installs the matching llama-cpp-python
+# backend. The '|| echo' keeps 'set -e' from aborting the chain if the backend
+# verify only warns -- you can still download a model and fix the runtime after.
+# Re-run either wizard any time: 'uv run cogito-install' / 'uv run cogito-model'.
+uv run cogito-install || echo "(backend install reported an issue -- re-run 'uv run cogito-install' any time.)"
+
+echo ""
+echo "----------------------------------------------"
+echo "Now let's get a model..."
+echo "----------------------------------------------"
+echo ""
+# cogito-model recommends a GGUF that fits your hardware, downloads it, and hands
+# you the exact 'uv run cogito ...' command to start a run.
+exec uv run cogito-model

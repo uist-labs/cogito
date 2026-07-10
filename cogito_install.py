@@ -136,10 +136,9 @@ def _next_steps(out):
     """Forward-pointing exit -- the single source for post-install guidance."""
     print("", file=out)
     print("Backend installed. Next steps:", file=out)
-    print("  1. Get a GGUF model (see 'Getting a Model' in README.md).", file=out)
-    print("  2. Run an experiment, e.g.:", file=out)
-    print("       uv run cogito --model /path/to/model.gguf "
-          "--genesis-type mirror --cycles 50", file=out)
+    print("  1. Download a model:  uv run cogito-model", file=out)
+    print("     (a guided picker: recommends a GGUF that fits your hardware,", file=out)
+    print("      downloads it, and hands you the exact 'uv run cogito ...' command).", file=out)
     print("  Or watch the bundled demo now (no model/GPU):", file=out)
     print("       uv run cogito-viz examples/demo_run", file=out)
 
