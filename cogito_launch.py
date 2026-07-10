@@ -14,7 +14,26 @@ clock) are injected so the logic is testable offline.
 import sys
 from pathlib import Path
 
+import cogito
 import cogito_models as models
+
+
+# --- Run parameters --------------------------------------------------------
+
+# The launcher's first-run defaults. Six match cogito.py's own CLI defaults;
+# cycles is 50 (a gentler first run than cogito's bare-CLI 100, and the value
+# cogito-model already prints in its suggested command -- the front door stays
+# consistent with what the picker showed).
+DEFAULTS = {
+    "genesis_type": "mirror",
+    "genesis_prompt": "",
+    "cycles": 50,
+    "context_size": 16384,
+    "tokens_per_cycle": 256,
+    "temperature": 0.8,
+    "top_p": 0.95,
+    "repeat_penalty": 1.1,
+}
 
 
 # --- Model resolution ------------------------------------------------------
@@ -87,3 +106,99 @@ def resolve_offload(model_path, catalog, detection):
             return f.gpu_layers, f.reason
     return -1, (f"{name} is not in the catalog; attempting full GPU offload -- "
                 "lower --gpu-layers if you hit OOM")
+
+
+# --- Parameter wizard ------------------------------------------------------
+
+def _prompt_choice(label, default, choices, input_fn, out):
+    while True:
+        raw = input_fn(f"{label} [{default}]: ").strip()
+        if not raw:
+            return default
+        if raw in choices:
+            return raw
+        print(f"  Choose one of: {', '.join(choices)}", file=out)
+
+
+def _prompt_nonempty(label, input_fn, out):
+    while True:
+        raw = input_fn(f"{label}: ").strip()
+        if raw:
+            return raw
+        print("  Please enter a non-empty prompt.", file=out)
+
+
+def _prompt_number(label, default, cast, input_fn, out, *, minimum=None, maximum=None):
+    kind = "whole number" if cast is int else "number"
+    while True:
+        raw = input_fn(f"{label} [{default}]: ").strip()
+        if not raw:
+            return default
+        try:
+            value = cast(raw)
+        except ValueError:
+            print(f"  Please enter a {kind}.", file=out)
+            continue
+        if minimum is not None and value < minimum:
+            print(f"  Must be >= {minimum}.", file=out)
+            continue
+        if maximum is not None and value > maximum:
+            print(f"  Must be <= {maximum}.", file=out)
+            continue
+        return value
+
+
+def prompt_params(defaults, input_fn=input, out=sys.stdout):
+    """START/tune gate, then the seven-field wizard. Every field Enter-defaults.
+
+    Returns a params dict shaped like DEFAULTS. The gate's default is START, so
+    Enter (or 'start') launches with recommended settings; 'tune' walks the
+    full parameter set.
+    """
+    gate = input_fn("Start now, or tune parameters? [START/tune] ").strip().lower()
+    if gate in ("", "start", "s"):
+        return dict(defaults)
+
+    p = dict(defaults)
+    genesis_choices = list(cogito.GENESIS_PROMPTS.keys()) + ["custom"]
+    p["genesis_type"] = _prompt_choice(
+        "Genesis prompt", defaults["genesis_type"], genesis_choices, input_fn, out)
+    if p["genesis_type"] == "custom":
+        p["genesis_prompt"] = _prompt_nonempty("Custom genesis prompt", input_fn, out)
+    p["cycles"] = _prompt_number(
+        "Cycles (0 = infinite)", defaults["cycles"], int, input_fn, out, minimum=0)
+    p["context_size"] = _prompt_number(
+        "Context size", defaults["context_size"], int, input_fn, out, minimum=1)
+    p["tokens_per_cycle"] = _prompt_number(
+        "Tokens per cycle", defaults["tokens_per_cycle"], int, input_fn, out, minimum=1)
+    p["temperature"] = _prompt_number(
+        "Temperature", defaults["temperature"], float, input_fn, out, minimum=0.0)
+    p["top_p"] = _prompt_number(
+        "Top-p", defaults["top_p"], float, input_fn, out, minimum=0.0, maximum=1.0)
+    p["repeat_penalty"] = _prompt_number(
+        "Repeat penalty", defaults["repeat_penalty"], float, input_fn, out, minimum=0.0)
+    return p
+
+
+# --- Argv construction -----------------------------------------------------
+
+def build_argv(model_path, params, gpu_layers, log_dir):
+    """The exact cogito CLI argv. Pure -- the contract the launch seam runs and
+    --dry-run prints."""
+    argv = [
+        "--model", str(model_path),
+        "--genesis-type", params["genesis_type"],
+    ]
+    if params["genesis_type"] == "custom":
+        argv += ["--genesis-prompt", params["genesis_prompt"]]
+    argv += [
+        "--cycles", str(params["cycles"]),
+        "--context-size", str(params["context_size"]),
+        "--tokens-per-cycle", str(params["tokens_per_cycle"]),
+        "--temperature", str(params["temperature"]),
+        "--top-p", str(params["top_p"]),
+        "--repeat-penalty", str(params["repeat_penalty"]),
+        "--gpu-layers", str(gpu_layers),
+        "--log-dir", str(log_dir),
+    ]
+    return argv
