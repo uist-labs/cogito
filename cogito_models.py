@@ -63,6 +63,7 @@ MODELS = [
         quant="Q4_K_M",
         size_bytes=986048768,
         n_layers=28,
+        sha256="1adf0b11065d8ad2e8123ea110d1ec956dab4ab038eab665614adba04b6c3370",
         notes="Small; comfortable on 8 GB cards and modern CPUs.",
     ),
     Model(
