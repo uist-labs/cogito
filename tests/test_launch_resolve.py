@@ -93,6 +93,14 @@ class ResolveModelTest(unittest.TestCase):
                                    input_fn=scripted(["9", "x", "1"]), out=io.StringIO())
         self.assertEqual(got, files[0])
 
+    def test_many_discovered_non_interactive_uses_most_recent_without_prompt(self):
+        files = [Path("/m/a.gguf"), Path("/m/b.gguf")]
+        out = io.StringIO()
+        got = launch.resolve_model(None, "/m", lister=lambda _d: files,
+                                   input_fn=never_prompt, out=out, interactive=False)
+        self.assertEqual(got, files[0])
+        self.assertIn("most recent", out.getvalue().lower())
+
 
 class ResolveOffloadTest(unittest.TestCase):
     def test_catalog_match_uses_fit_values(self):

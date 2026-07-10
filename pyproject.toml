@@ -36,6 +36,7 @@ cogito-viz = "visualize:main"
 cogito-viz-advanced = "visualize_advanced:main"
 cogito-install = "cogito_install:main"
 cogito-model = "cogito_modelpick:main"
+cogito-run = "cogito_launch:main"
 
 [project.urls]
 Homepage = "https://github.com/uistlabs/cogito"

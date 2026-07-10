@@ -11,11 +11,16 @@ Stdlib-only. Side effects (the loop, the visualizer, stdin, the listing, the
 clock) are injected so the logic is testable offline.
 """
 
+import argparse
+import importlib.util
 import sys
+import time
 from pathlib import Path
 
 import cogito
+import cogito_detect as detect
 import cogito_models as models
+import visualize
 
 
 # --- Run parameters --------------------------------------------------------
@@ -66,11 +71,14 @@ def _pick_model(files, input_fn, out):
         print(f"  Please press Enter or enter a number 1-{len(files)}.", file=out)
 
 
-def resolve_model(model_flag, dest, *, lister=None, input_fn=input, out=sys.stdout):
+def resolve_model(model_flag, dest, *, lister=None, input_fn=input, out=sys.stdout,
+                  interactive=True):
     """Resolve which model to run: ``--model`` wins, else discover under ``dest``.
 
     Returns a ``Path``, or ``None`` (with an actionable message printed) when the
-    flagged file is missing or nothing is downloaded yet.
+    flagged file is missing or nothing is downloaded yet. With several models and
+    ``interactive`` false (``--yes``/``--dry-run``/no tty), the most-recent is
+    used without prompting rather than blocking on stdin.
     """
     if model_flag:
         p = Path(model_flag)
@@ -85,6 +93,10 @@ def resolve_model(model_flag, dest, *, lister=None, input_fn=input, out=sys.stdo
               "Run 'uv run cogito-model' first to download one.", file=out)
         return None
     if len(files) == 1:
+        return files[0]
+    if not interactive:
+        print(f"Several models found; using the most recent: {files[0].name} "
+              "(pass --model to choose another).", file=out)
         return files[0]
     return _pick_model(files, input_fn, out)
 
@@ -202,3 +214,115 @@ def build_argv(model_path, params, gpu_layers, log_dir):
         "--log-dir", str(log_dir),
     ]
     return argv
+
+
+# --- Flow ------------------------------------------------------------------
+
+def _backend_installed():
+    """True if a llama-cpp-python backend is importable (mirrors cogito-model)."""
+    return importlib.util.find_spec("llama_cpp") is not None
+
+
+def _offload_desc(gpu_layers):
+    if gpu_layers < 0:
+        return "all layers on GPU"
+    if gpu_layers == 0:
+        return "CPU only"
+    return f"{gpu_layers} layers on GPU"
+
+
+_PASSTHROUGH = ("genesis_type", "genesis_prompt", "cycles", "context_size",
+                "tokens_per_cycle", "temperature", "top_p", "repeat_penalty")
+
+
+def main(argv=None, *, detect_fn=None, catalog=None, input_fn=input,
+         lister=None, run_fn=None, viz_fn=None, out=None, now=None,
+         backend_installed=None, isatty=None) -> int:
+    out = out or sys.stdout
+    detect_fn = detect_fn or detect.detect
+    catalog = list(catalog) if catalog is not None else list(models.iter_models())
+    run_fn = run_fn or cogito.main
+    viz_fn = viz_fn or visualize.main
+    backend_installed = backend_installed or _backend_installed
+    now = now or (lambda: time.strftime("%Y%m%d_%H%M%S"))
+    isatty = isatty or sys.stdin.isatty
+
+    parser = argparse.ArgumentParser(
+        prog="cogito-run",
+        description="Launch a COGITO ponder loop from a downloaded model, then "
+                    "visualize it.",
+    )
+    parser.add_argument("--model", metavar="PATH",
+                        help="GGUF to run (default: discover under ./models)")
+    parser.add_argument("--dest", metavar="PATH", default="models",
+                        help="directory to look for models in (default: ./models)")
+    parser.add_argument("--yes", action="store_true",
+                        help="skip the wizard and launch with recommended defaults")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="show the plan (model, run command, viz) and launch nothing")
+    # Pass-through overrides: pre-seed the wizard defaults / the --yes launch.
+    parser.add_argument("--genesis-type")
+    parser.add_argument("--genesis-prompt")
+    parser.add_argument("--cycles", type=int)
+    parser.add_argument("--context-size", type=int)
+    parser.add_argument("--tokens-per-cycle", type=int)
+    parser.add_argument("--temperature", type=float)
+    parser.add_argument("--top-p", type=float)
+    parser.add_argument("--repeat-penalty", type=float)
+    args = parser.parse_args(argv)
+
+    if not backend_installed():
+        print("No llama-cpp-python backend installed. "
+              "Run 'uv run cogito-install' first.", file=out)
+        return 1
+
+    # Interactive only when a human is at a tty and has not asked to skip prompts.
+    interactive = isatty() and not args.yes and not args.dry_run
+
+    model_path = resolve_model(args.model, args.dest, lister=lister,
+                               input_fn=input_fn, out=out, interactive=interactive)
+    if model_path is None:
+        return 1
+
+    detection = detect_fn()
+    gpu_layers, note = resolve_offload(model_path, catalog, detection)
+    print(f"Model:   {model_path}", file=out)
+    print(f"Offload: {_offload_desc(gpu_layers)} ({note})", file=out)
+
+    defaults = dict(DEFAULTS)
+    for key in _PASSTHROUGH:
+        value = getattr(args, key)
+        if value is not None:
+            defaults[key] = value
+
+    log_dir = str(Path("logs") / f"run_{now()}")
+
+    if interactive:
+        params = prompt_params(defaults, input_fn, out)
+    else:
+        params = dict(defaults)
+
+    run_argv = build_argv(model_path, params, gpu_layers, log_dir)
+
+    if args.dry_run:
+        print("\n[dry run] would launch:", file=out)
+        print("    uv run cogito " + " ".join(run_argv), file=out)
+        print(f"    then: uv run cogito-viz {log_dir}", file=out)
+        return 0
+
+    print(f"\nStarting the ponder loop (Ctrl-C to stop early)...\n", file=out)
+    try:
+        run_fn(run_argv)
+    except KeyboardInterrupt:
+        print("\nRun interrupted -- visualizing what was captured so far.", file=out)
+
+    try:
+        viz_fn([log_dir])
+    except Exception as exc:  # a viz hiccup must never sink a good run
+        print(f"\n(cogito-viz could not run: {exc}. "
+              f"Visualize later with: uv run cogito-viz {log_dir})", file=out)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
