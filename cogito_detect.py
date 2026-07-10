@@ -42,6 +42,27 @@ class Detection:
     glibc: Optional[Tuple[int, int]] = None
 
 
+@dataclass(frozen=True)
+class Recommendation:
+    """A backend recommendation with the reasoning the wizard prints verbatim.
+
+    ``source_build_key`` names the backend the user could build from source when the
+    prebuilt wheel is not viable (e.g. a GPU on glibc < 2.35); None when the
+    recommended key is directly installable.
+    """
+
+    key: str
+    rationale: str
+    caveats: Tuple[str, ...] = ()
+    source_build_key: Optional[str] = None
+
+
+# glibc floor for the CUDA/ROCm prebuilt wheels (cpu/vulkan are manylinux2014).
+GLIBC_WHEEL_FLOOR = (2, 35)
+# CUDA 13 dropped everything below Turing (compute capability 7.5).
+TURING_CC = 7.5
+
+
 # --- pure parsers (text -> value; never raise) -----------------------------
 
 def parse_nvidia_smi_cuda(text: str) -> Optional[Tuple[int, int]]:
@@ -177,4 +198,75 @@ def detect(
         rocm_ok=rocm_ok,
         vulkan=vulkan,
         glibc=glibc,
+    )
+
+
+# --- recommendation (pure Detection -> Recommendation) ---------------------
+
+def _glibc_meets_floor(det: Detection) -> bool:
+    return det.glibc is not None and det.glibc >= GLIBC_WHEEL_FLOOR
+
+
+def _nvidia_cuda_key(det: Detection) -> str:
+    """cu124 vs cu130 by GPU compute capability -- NOT by driver max-CUDA.
+
+    CUDA 13 removed pre-Turing (CC < 7.5) support, so those GPUs need the CUDA 12.x
+    wheel even when the driver advertises CUDA 13. Unknown CC -> conservative cu124.
+    """
+    cc = det.nvidia_compute_cap
+    if cc is None or cc < TURING_CC:
+        return "cu124"
+    if det.nvidia_max_cuda is not None and det.nvidia_max_cuda >= (13, 0):
+        return "cu130"
+    return "cu124"
+
+
+def recommend(det: Detection) -> Recommendation:
+    """Map a Detection to a backend, conservative on uncertainty. Pure; no catalog."""
+    # 1. Apple Silicon.
+    if det.system == "Darwin" and det.machine in ("arm64", "aarch64"):
+        return Recommendation("metal", "Apple Silicon (arm64) detected -- Metal backend.")
+
+    # 2/3. NVIDIA.
+    if det.nvidia:
+        cuda_key = _nvidia_cuda_key(det)
+        cc = det.nvidia_compute_cap
+        cc_str = (f"compute capability {cc}" if cc is not None
+                  else "unknown compute capability")
+        if _glibc_meets_floor(det):
+            return Recommendation(
+                cuda_key, f"NVIDIA GPU ({cc_str}); recommending {cuda_key}."
+            )
+        why = ("glibc below the 2.35 floor" if det.glibc is not None
+               else "glibc could not be verified")
+        return Recommendation(
+            "cpu",
+            f"NVIDIA GPU ({cc_str}) but {why} for the prebuilt CUDA wheel; using cpu. "
+            f"A source build enables the GPU.",
+            caveats=(
+                f"The prebuilt {cuda_key} wheel needs glibc >= 2.35; build "
+                f"llama-cpp-python from source to use the GPU.",
+            ),
+            source_build_key=cuda_key,
+        )
+
+    # 4/5. AMD.
+    if det.amd_gpu:
+        if det.rocm_ok and _glibc_meets_floor(det):
+            return Recommendation(
+                "rocm72", "AMD GPU with a working ROCm stack; recommending rocm72."
+            )
+        if det.vulkan:
+            note = ("ROCm not detected" if not det.rocm_ok
+                    else "glibc below the 2.35 floor for the ROCm wheel")
+            return Recommendation(
+                "vulkan", f"AMD GPU; {note} -- using the cross-vendor Vulkan backend."
+            )
+        return Recommendation(
+            "cpu", "AMD GPU but no usable ROCm or Vulkan runtime; using cpu."
+        )
+
+    # 6. Universal fallback.
+    return Recommendation(
+        "cpu", "No supported GPU detected; using the universal cpu backend."
     )
