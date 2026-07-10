@@ -85,9 +85,16 @@ git clone https://github.com/uistlabs/cogito.git
 cd cogito
 
 # One-command setup: installs uv if needed, builds the core environment,
-# and prints your next steps.
+# then guides you through backend install, model download, and your first run.
 ./setup.sh
 ```
+
+`setup.sh` walks the whole path: `cogito-install` (picks the backend for your
+hardware) -> `cogito-model` (downloads a model that fits) -> `cogito-run`
+(guides the run parameters, launches the ponder loop, and opens the visualizer
+when it finishes). Press Enter to accept each default, or `tune` at the launch
+gate to adjust the genesis prompt and sampling. Re-run any step any time -- e.g.
+`uv run cogito-run` to start another experiment.
 
 Or drive uv yourself:
 

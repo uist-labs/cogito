@@ -48,6 +48,18 @@ echo "----------------------------------------------"
 echo "Now let's get a model..."
 echo "----------------------------------------------"
 echo ""
-# cogito-model recommends a GGUF that fits your hardware, downloads it, and hands
-# you the exact 'uv run cogito ...' command to start a run.
-exec uv run cogito-model
+# cogito-model recommends a GGUF that fits your hardware and downloads it. The
+# '|| echo' keeps 'set -e' from aborting the chain if the model step is skipped
+# (e.g. a non-interactive shell) -- you can grab one later and re-run cogito-run.
+uv run cogito-model || echo "(model step skipped -- grab one later with 'uv run cogito-model'.)"
+
+echo ""
+echo "----------------------------------------------"
+echo "Ready to ponder..."
+echo "----------------------------------------------"
+echo ""
+# cogito-run finds the model, guides the run parameters (press Enter to start
+# with the recommended defaults, or 'tune' to adjust them; Ctrl-C to defer),
+# launches the ponder loop, and opens the visualizer when it finishes.
+# Re-run any time: 'uv run cogito-run'.
+exec uv run cogito-run

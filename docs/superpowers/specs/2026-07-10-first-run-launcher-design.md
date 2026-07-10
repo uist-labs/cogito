@@ -72,8 +72,12 @@ Out of scope (deferred to publish, the other half of S3):
    with all defaults; `tune` walks the full seven-field wizard. This reconciles
    "full control" with the 2 AM-admin ergonomic: a newcomer is never *forced*
    to reason about `top-p` before their first ponder, but every knob is one
-   keystroke away. `setup.sh` invokes `--yes`, which is equivalent to `START`
-   with all defaults (no gate at all in the chained flow).
+   keystroke away. `--yes` skips the gate entirely (all defaults) for zero-touch
+   automation. **Execution deviation (2026-07-10, Ken's call):** `setup.sh` ends
+   at the *gate* (plain `cogito-run`, not `--yes`), not auto-launching -- a fresh
+   clone stops for one keystroke before a multi-minute GPU run rather than
+   starting it unprompted. A Ctrl-C at the gate defers cleanly ("start it when
+   you're ready with 'uv run cogito-run'"). `--yes` remains for true zero-touch.
 
 3. **Standalone `cogito-run`, chained from `cogito-model`, wizards stay
    decoupled.** Mirrors the S1/S2 shape
@@ -177,10 +181,11 @@ called as a script (`argv=None` reads `sys.argv`). Enables the in-process seam.
 
 ### `setup.sh` (touch-up)
 
-Append a step: after `cogito-model`, chain
-`exec uv run cogito-run --yes` (all-defaults, no gate) so the guided flow ends
-in a running experiment. Keep the existing `|| echo "re-run any time"` safety
-idiom so a non-fatal hiccup still leaves the user with actionable next steps.
+Append a step: after `cogito-model`, chain `exec uv run cogito-run` (at the
+gate, per the execution deviation above -- not `--yes`) so the guided flow ends
+ready to ponder, one keystroke from a run. Keep a `|| echo "re-run any time"`
+safety idiom so a non-fatal hiccup still leaves the user with actionable next
+steps.
 
 ### `pyproject.toml` (touch-up)
 

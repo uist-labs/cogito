@@ -6,6 +6,30 @@ All notable discoveries and changes to COGITO.
 
 ## [Unreleased]
 
+### First-run launcher (`cogito-run`)
+
+A stdlib-only terminal wizard that closes the last gap: from a downloaded model
+to a running ponder loop and its visualization, with no copy-pasting.
+
+- **Finds the model.** Uses `--model` if given, otherwise discovers `*.gguf`
+  under `./models` -- one file is used directly, several offer a pick, none
+  points you at `cogito-model`.
+- **Reuses the fit.** Matches the file to the curated catalog to reuse the S2
+  VRAM fit for `--gpu-layers`; an unknown file falls back to full offload with
+  an OOM note.
+- **START or tune.** Press Enter to launch with recommended defaults, or `tune`
+  to walk all seven run parameters (genesis prompt, cycles, context, tokens,
+  temperature, top-p, repeat-penalty) -- each Enter-accepts its default.
+- **Launches, then visualizes.** Runs the loop in-process (thoughts stream
+  live) into a per-run `./logs/run_<timestamp>` directory, then hands it to
+  `cogito-viz` automatically when it finishes -- including after a Ctrl-C. A
+  visualizer hiccup warns but never sinks a good run.
+- **`cogito-run` entry point** with `--model`, `--dest`, `--yes`, `--dry-run`,
+  and pass-through parameter overrides. `setup.sh` now ends by launching it
+  (at the gate, so a fresh clone stops for one keystroke before the run).
+- Enabling change: `cogito.main` and `visualize.main` accept an explicit `argv`
+  so the launcher drives them in-process (no subprocess).
+
 ### Guided model picker (`cogito-model`)
 
 A stdlib-only terminal wizard that takes you from "which model?" to a downloaded,

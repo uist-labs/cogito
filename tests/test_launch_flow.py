@@ -70,6 +70,17 @@ class FlowTest(unittest.TestCase):
                          launch.build_argv(str(MODEL), dict(launch.DEFAULTS), -1, LOG_DIR))
         self.assertEqual(viz.calls, [[LOG_DIR]])
 
+    def test_ctrl_c_at_the_gate_cancels_cleanly_without_launching(self):
+        def boom(_prompt=""):
+            raise KeyboardInterrupt()
+        run, viz = Recorder(), Recorder()
+        out = io.StringIO()
+        rc = run_main([], run_fn=run, viz_fn=viz, out=out, input_fn=boom)
+        self.assertEqual(rc, 0)
+        self.assertEqual(run.calls, [])
+        self.assertEqual(viz.calls, [])
+        self.assertIn("cogito-run", out.getvalue())
+
     def test_keyboard_interrupt_still_visualizes(self):
         run, viz = Recorder(raises=KeyboardInterrupt()), Recorder()
         out = io.StringIO()

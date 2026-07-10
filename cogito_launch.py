@@ -279,28 +279,31 @@ def main(argv=None, *, detect_fn=None, catalog=None, input_fn=input,
     # Interactive only when a human is at a tty and has not asked to skip prompts.
     interactive = isatty() and not args.yes and not args.dry_run
 
-    model_path = resolve_model(args.model, args.dest, lister=lister,
-                               input_fn=input_fn, out=out, interactive=interactive)
-    if model_path is None:
-        return 1
+    # Everything up to launch may prompt; a Ctrl-C here means "not now", cleanly.
+    try:
+        model_path = resolve_model(args.model, args.dest, lister=lister,
+                                   input_fn=input_fn, out=out, interactive=interactive)
+        if model_path is None:
+            return 1
 
-    detection = detect_fn()
-    gpu_layers, note = resolve_offload(model_path, catalog, detection)
-    print(f"Model:   {model_path}", file=out)
-    print(f"Offload: {_offload_desc(gpu_layers)} ({note})", file=out)
+        detection = detect_fn()
+        gpu_layers, note = resolve_offload(model_path, catalog, detection)
+        print(f"Model:   {model_path}", file=out)
+        print(f"Offload: {_offload_desc(gpu_layers)} ({note})", file=out)
 
-    defaults = dict(DEFAULTS)
-    for key in _PASSTHROUGH:
-        value = getattr(args, key)
-        if value is not None:
-            defaults[key] = value
+        defaults = dict(DEFAULTS)
+        for key in _PASSTHROUGH:
+            value = getattr(args, key)
+            if value is not None:
+                defaults[key] = value
+
+        params = prompt_params(defaults, input_fn, out) if interactive else dict(defaults)
+    except KeyboardInterrupt:
+        print("\nCancelled before launch. Start it when you're ready with "
+              "'uv run cogito-run'.", file=out)
+        return 0
 
     log_dir = str(Path("logs") / f"run_{now()}")
-
-    if interactive:
-        params = prompt_params(defaults, input_fn, out)
-    else:
-        params = dict(defaults)
 
     run_argv = build_argv(model_path, params, gpu_layers, log_dir)
 
