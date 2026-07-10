@@ -31,9 +31,11 @@ class Recorder:
         return self.rc
 
 
-def run_wizard(argv, inputs=(), detection=PASCAL, installed=False, rc=0, isatty=True):
+def run_wizard(argv, inputs=(), detection=PASCAL, installed=False, rc=0, isatty=True,
+               verify=(True, ""), out=None):
     rec = Recorder(rc=rc)
     it = iter(inputs)
+    out = out if out is not None else io.StringIO()
 
     def input_fn(prompt=""):
         return next(it)
@@ -45,7 +47,8 @@ def run_wizard(argv, inputs=(), detection=PASCAL, installed=False, rc=0, isatty=
         input_fn=input_fn,
         is_installed=lambda key: installed,
         isatty=lambda: isatty,
-        out=io.StringIO(),
+        verify_fn=lambda key: verify,
+        out=out,
     )
     return code, rec
 
@@ -101,6 +104,29 @@ class TestNonInteractiveRobustness(unittest.TestCase):
         code, rec = run_wizard([], inputs=[], isatty=False)
         self.assertEqual(code, 0)
         self.assertEqual(rec.cmds, [["uv", "sync", "--extra", "cu124"]])
+
+
+class TestPostInstallVerification(unittest.TestCase):
+    def test_verify_success_prints_next_steps(self):
+        out = io.StringIO()
+        code, rec = run_wizard(["--yes"], verify=(True, ""), out=out)
+        self.assertEqual(code, 0)
+        self.assertIn("Next steps", out.getvalue())
+
+    def test_verify_failure_reports_actionable_guidance_and_nonzero(self):
+        out = io.StringIO()
+        code, rec = run_wizard(
+            ["--yes"],
+            verify=(False, "libcudart.so.12: cannot open shared object file"),
+            out=out,
+        )
+        self.assertNotEqual(code, 0)
+        text = out.getvalue()
+        # The install ran, but we must NOT claim success.
+        self.assertNotIn("Next steps", text)
+        # Actionable: name the runtime and a concrete fix for cu12.
+        self.assertIn("nvidia-cuda-runtime-cu12", text)
+        self.assertIn("cuda-downloads", text)
 
 
 class TestDryRunner(unittest.TestCase):

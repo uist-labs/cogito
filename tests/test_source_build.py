@@ -106,7 +106,8 @@ class TestWizardOffer(unittest.TestCase):
             input_fn=lambda prompt="": next(it),
             is_installed=lambda key: installed,
             which=which_factory(FULL_CUDA),
-            isatty=lambda: True, out=io.StringIO(),
+            isatty=lambda: True, verify_fn=lambda key: (True, ""),
+            out=io.StringIO(),
         )
         return code, rec
 

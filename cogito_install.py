@@ -37,6 +37,48 @@ def _llama_cpp_installed(_key):
     return importlib.util.find_spec("llama_cpp") is not None
 
 
+def _default_verify(_key):
+    """Smoke-test that the installed backend actually loads.
+
+    Returns (ok, detail). Runs in a subprocess so a failed native load (missing CUDA
+    runtime, wrong GPU arch, ...) cannot crash the wizard. A clean install is not the
+    same as a working backend -- this is what turns silent breakage into a diagnosis.
+    """
+    proc = subprocess.run(
+        [sys.executable, "-c", "import llama_cpp"],
+        capture_output=True, text=True,
+    )
+    return proc.returncode == 0, proc.stderr
+
+
+def _verify_and_report(key, verify_fn, out) -> bool:
+    ok, detail = verify_fn(key)
+    if ok:
+        return True
+    print("", file=out)
+    print(f"Warning: {key} installed but failed to load -- the backend is not usable "
+          f"yet.", file=out)
+    detail_low = (detail or "").lower()
+    if key.startswith("cu") and ("cudart" in detail_low or "libcu" in detail_low
+                                 or key[2:4].isdigit()):
+        major = key[2:4]  # cu124 -> "12", cu130 -> "13"
+        print(f"  Cause: the CUDA {major} runtime libraries are missing "
+              f"(e.g. libcudart.so.{major}). The prebuilt wheel needs the CUDA runtime "
+              f"on your system; the GPU driver alone is not enough.", file=out)
+        print("  Fix it either way:", file=out)
+        print("    - Install the CUDA Toolkit: "
+              "https://developer.nvidia.com/cuda-downloads", file=out)
+        print(f"    - Or the runtime pip packages:\n"
+              f"        uv pip install nvidia-cuda-runtime-cu{major} "
+              f"nvidia-cublas-cu{major} nvidia-cuda-nvrtc-cu{major}", file=out)
+        print(f"  Then re-run: cogito-install --backend {key}", file=out)
+    else:
+        last = detail.strip().splitlines()[-1] if detail.strip() else "unknown error"
+        print(f"  Details: {last}", file=out)
+        print("  See the Hardware Support notes in README.md.", file=out)
+    return False
+
+
 # --- menu / rendering ------------------------------------------------------
 
 def _ordered_keys(recommended):
@@ -206,12 +248,13 @@ def source_build(backend_key, *, runner, which, out, system=None) -> int:
 
 
 def main(argv=None, *, detect_fn=None, runner=None, input_fn=input,
-         is_installed=None, isatty=None, which=None, out=None) -> int:
+         is_installed=None, isatty=None, which=None, verify_fn=None, out=None) -> int:
     out = out or sys.stdout
     detect_fn = detect_fn or detect.detect
     is_installed = is_installed or _llama_cpp_installed
     isatty = isatty or sys.stdin.isatty
     which = which or shutil.which
+    verify_fn = verify_fn or _default_verify
 
     parser = argparse.ArgumentParser(
         prog="cogito-install",
@@ -267,8 +310,12 @@ def main(argv=None, *, detect_fn=None, runner=None, input_fn=input,
     if rc != 0:
         print(f"Install failed (exit {rc}).", file=out)
         return rc
-    if not args.dry_run:
-        _next_steps(out)
+    if args.dry_run:
+        return 0
+    # A clean install is not a working backend -- verify it actually loads.
+    if not _verify_and_report(chosen, verify_fn, out):
+        return 1
+    _next_steps(out)
     return 0
 
 
