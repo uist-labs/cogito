@@ -71,6 +71,25 @@ class TuneTest(unittest.TestCase):
         params = launch.prompt_params(launch.DEFAULTS, scripted(script), io.StringIO())
         self.assertEqual(params["top_p"], 0.9)
 
+    def test_genesis_menu_shown_up_front_with_custom_hint(self):
+        # The field must not read as a free-text box: show the named seeds and
+        # how to write your own before the first prompt.
+        out = io.StringIO()
+        launch.prompt_params(launch.DEFAULTS, scripted(["tune"] + [""] * 7), out)
+        text = out.getvalue()
+        self.assertIn("custom", text.lower())
+        self.assertIn("mirror", text)
+        self.assertIn("void", text)
+
+    def test_invalid_genesis_message_names_input_and_points_at_custom(self):
+        out = io.StringIO()
+        launch.prompt_params(
+            launch.DEFAULTS,
+            scripted(["tune", "my own idea", "void"] + [""] * 6), out)
+        text = out.getvalue()
+        self.assertIn("my own idea", text)   # actionable: names what they typed
+        self.assertIn("custom", text.lower())  # ...and how to write their own
+
     def test_genesis_choices_come_from_cogito(self):
         # every built-in cogito genesis is accepted by the wizard
         for key in cogito.GENESIS_PROMPTS:

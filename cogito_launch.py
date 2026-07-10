@@ -122,22 +122,37 @@ def resolve_offload(model_path, catalog, detection):
 
 # --- Parameter wizard ------------------------------------------------------
 
-def _prompt_choice(label, default, choices, input_fn, out):
-    while True:
-        raw = input_fn(f"{label} [{default}]: ").strip()
-        if not raw:
-            return default
-        if raw in choices:
-            return raw
-        print(f"  Choose one of: {', '.join(choices)}", file=out)
-
-
 def _prompt_nonempty(label, input_fn, out):
     while True:
         raw = input_fn(f"{label}: ").strip()
         if raw:
             return raw
         print("  Please enter a non-empty prompt.", file=out)
+
+
+def _prompt_genesis(default, input_fn, out):
+    """Pick a genesis seed. Returns ``(genesis_type, genesis_prompt)``.
+
+    The genesis field reads like a free-text box but wants one of a fixed set of
+    named seeds -- so show the menu up front (sourced from cogito.GENESIS_PROMPTS,
+    no drift) and, on unknown input, say what was typed and how to write your own
+    ('custom'), rather than reprinting a bare list.
+    """
+    seeds = list(cogito.GENESIS_PROMPTS.keys())
+    print("Genesis prompt -- the seed thought that starts the loop "
+          "(see README for what each does).", file=out)
+    print("  Named seeds: " + ", ".join(seeds), file=out)
+    print("  ...or type 'custom' to write your own.", file=out)
+    while True:
+        raw = input_fn(f"Genesis [{default}]: ").strip()
+        if not raw:
+            return default, ""
+        if raw == "custom":
+            return "custom", _prompt_nonempty("Your genesis prompt", input_fn, out)
+        if raw in seeds:
+            return raw, ""
+        print(f"  '{raw}' isn't a seed name -- pick one from the list above, "
+              "or type 'custom' to write your own.", file=out)
 
 
 def _prompt_number(label, default, cast, input_fn, out, *, minimum=None, maximum=None):
@@ -172,11 +187,10 @@ def prompt_params(defaults, input_fn=input, out=sys.stdout):
         return dict(defaults)
 
     p = dict(defaults)
-    genesis_choices = list(cogito.GENESIS_PROMPTS.keys()) + ["custom"]
-    p["genesis_type"] = _prompt_choice(
-        "Genesis prompt", defaults["genesis_type"], genesis_choices, input_fn, out)
-    if p["genesis_type"] == "custom":
-        p["genesis_prompt"] = _prompt_nonempty("Custom genesis prompt", input_fn, out)
+    gtype, gtext = _prompt_genesis(defaults["genesis_type"], input_fn, out)
+    p["genesis_type"] = gtype
+    if gtype == "custom":
+        p["genesis_prompt"] = gtext
     p["cycles"] = _prompt_number(
         "Cycles (0 = infinite)", defaults["cycles"], int, input_fn, out, minimum=0)
     p["context_size"] = _prompt_number(
