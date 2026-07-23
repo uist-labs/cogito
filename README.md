@@ -89,7 +89,7 @@ cd cogito
 ./setup.sh
 ```
 
-That one command is the whole front door -- three guided steps, each a wizard
+That one command is the whole front door - three guided steps, each a wizard
 that asks one thing at a time and takes a sensible default on Enter:
 
 - **`cogito-install`** detects your hardware and installs the matching
@@ -101,7 +101,7 @@ that asks one thing at a time and takes a sensible default on Enter:
 
 Hold Enter and you go from a fresh clone to watching a model think within
 minutes; type `tune` at the launch gate to shape the run instead. Each wizard is
-re-runnable on its own -- `uv run cogito-run` any time to start another
+re-runnable on its own - `uv run cogito-run` any time to start another
 experiment.
 
 Prefer to drive uv yourself?
@@ -219,7 +219,7 @@ A few pod-specific notes:
 ## Genesis Prompts
 
 The "genesis prompt" is the seed thought that starts the loop. Different seeds
-produce radically different patterns of cognition -- it is the single knob that
+produce radically different patterns of cognition - it is the single knob that
 most changes what emerges. COGITO ships twelve, in two families.
 
 ### Minimal / open - start from as little as possible
@@ -258,17 +258,17 @@ uv run cogito \
 ## How It Works
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│   Genesis ──▶ Generate ──▶ Analyze ──▶ Intervene?       │
-│      │            │            │            │           │
-│      │            └────────────┴────────────┘           │
-│      │                         │                        │
-│      │                    [metrics]                     │
-│      │                         │                        │
-│      └─────────── Context ◀────┘                        │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
++---------------------------------------------------------+
+|                                                         |
+|   Genesis --> Generate --> Analyze --> Intervene?       |
+|      |            |            |            |           |
+|      |            +------------+------------+           |
+|      |                         |                        |
+|      |                    [metrics]                     |
+|      |                         |                        |
+|      +----------- Context <----+                        |
+|                                                         |
++---------------------------------------------------------+
 ```
 
 1. **Genesis**: A seed prompt initializes the context
@@ -314,11 +314,11 @@ uv run cogito \
 
 ```
 logs/
-├── cogito_YYYYMMDD_HHMMSS.log    # Runtime log
-├── checkpoints/
-│   └── checkpoint_*.json         # Periodic state snapshots
-└── transcripts/
-    └── transcript_*.txt          # Full thought stream
++-- cogito_YYYYMMDD_HHMMSS.log    # Runtime log
++-- checkpoints/
+|   +-- checkpoint_*.json         # Periodic state snapshots
++-- transcripts/
+    +-- transcript_*.txt          # Full thought stream
 ```
 
 ---
