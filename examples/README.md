@@ -1,12 +1,12 @@
-# Examples — zero-GPU demo data
+# Examples - zero-GPU demo data
 
 This directory lets you try the COGITO visualizers **without a GPU, a model, or
-a live run** — useful for kicking the tires before committing to a real
+a live run** - useful for kicking the tires before committing to a real
 experiment.
 
 ## ⚠️ This data is synthetic
 
-`demo_run/` contains hand-authored, illustrative data — **not** the output of a
+`demo_run/` contains hand-authored, illustrative data - **not** the output of a
 real model. The numbers were written to model a *typical* trajectory we've
 observed (rich early exploration → a phase-transition collapse → interventions
 firing → a partial recovery) so the plots show interesting structure.
@@ -17,7 +17,7 @@ findings live in [`../CHANGELOG.md`](../CHANGELOG.md), and the figures in
 
 ## Try it
 
-From the repo root (with `numpy` and `matplotlib` installed — see the main
+From the repo root (with `numpy` and `matplotlib` installed - see the main
 [README](../README.md)):
 
 ```bash
@@ -30,7 +30,7 @@ python visualize_advanced.py examples/demo_run
 
 Both write PNGs into `examples/demo_run/` and run fine headless (no display
 needed), so they work the same on a RunPod pod as on your laptop. The generated
-PNGs are gitignored — regenerate them anytime.
+PNGs are gitignored - regenerate them anytime.
 
 ## Regenerate the data
 

@@ -1,4 +1,4 @@
-# COGITO uv Migration — Implementation Plan
+# COGITO uv Migration - Implementation Plan
 
 Companion to `2026-07-09-uv-migration-design.md`. Execute on branch
 `claude/uv-migration` in `/mnt/usb-single-1/dev/cogito` (the fapolicyd-sane zone).
@@ -11,7 +11,7 @@ uv extra-index priority means the abetlen wheel wins over the PyPI sdist.
 
 ---
 
-## Task 1 — pyproject.toml core + entry points + lockfile
+## Task 1 - pyproject.toml core + entry points + lockfile
 
 **Goal:** replace venv/requirements with a uv project; add console commands.
 
@@ -39,7 +39,7 @@ commands resolve.
 
 ---
 
-## Task 2 — backend catalog module (`cogito_backends.py`)
+## Task 2 - backend catalog module (`cogito_backends.py`)
 
 **Goal:** single source of truth for backends, as code (TUI seam; runtime-first compliant).
 
@@ -61,7 +61,7 @@ lists all six; helper lookups work.
 
 ---
 
-## Task 3 — per-backend uv extras (hybrid tier 2a)
+## Task 3 - per-backend uv extras (hybrid tier 2a)
 
 **Goal:** locked, one-command backend installs via `uv sync --extra <key>`.
 
@@ -73,7 +73,7 @@ lists all six; helper lookups work.
 - `[[tool.uv.index]]` per backend: `name`, `url` (abetlen `whl/<key>`), `explicit = true`.
 - `[tool.uv.sources]`: pin `llama-cpp-python` to the right index **per extra** (use uv's
   marker/extra-conditional source form; confirm exact current syntax against uv docs at
-  execution time — this is the fiddliest part).
+  execution time - this is the fiddliest part).
 - `[tool.uv]` `conflicts`: declare the backend extras mutually exclusive.
 
 Representative skeleton (finalize syntax during execution):
@@ -105,14 +105,14 @@ conflicts = [[{ extra = "cpu" }, { extra = "cu124" }, { extra = "cu130" },
 
 ---
 
-## Task 4 — slim `setup.sh` to a uv-bootstrap stub
+## Task 4 - slim `setup.sh` to a uv-bootstrap stub
 
 **Goal:** dependency-free front door; TUI seam.
 
 **Files:** rewrite `setup.sh`.
 
 **Steps:** (1) detect `uv`; if absent, install via the official installer; (2) `uv sync`
-the core; (3) print next steps — the `--extra <backend>` options (enumerated from the
+the core; (3) print next steps - the `--extra <backend>` options (enumerated from the
 catalog's keys, or a static echo kept in sync), how to get a model (README pointer), and
 the zero-GPU demo line (`uv run cogito-viz examples/demo_run`). No hardware detection.
 No model download.
@@ -124,7 +124,7 @@ steps; the uv-bootstrap branch is exercised (or guarded) without clobbering an e
 
 ---
 
-## Task 5 — README rewrite
+## Task 5 - README rewrite
 
 **Files:** `README.md`.
 
@@ -141,7 +141,7 @@ switch → `--reinstall-package llama-cpp-python --no-cache`).
 
 ---
 
-## Task 6 — CHANGELOG
+## Task 6 - CHANGELOG
 
 **Files:** `CHANGELOG.md`.
 
@@ -151,7 +151,7 @@ model download, README rewrite, ASCII-clean visualizer output.
 
 ---
 
-## Task 7 — verification pass + ASCII cleanup
+## Task 7 - verification pass + ASCII cleanup
 
 **Steps:**
 - ASCII-clean: replace the `Δ` in `visualize_advanced.py` output strings with `delta`
@@ -172,7 +172,7 @@ model download, README rewrite, ASCII-clean visualizer output.
 
 - Task 1 first (foundation). Task 2 independent (do early; Task 3 & 5 consume it).
 - Task 3 depends on 1. Task 4 depends on 1. Task 5 depends on 1–4. Tasks 6–7 last.
-- Fiddliest/riskiest: **Task 3** (uv per-extra source + conflicts syntax) — verify against
+- Fiddliest/riskiest: **Task 3** (uv per-extra source + conflicts syntax) - verify against
   current uv docs during execution; prove `--extra cpu` end-to-end before wiring all six.
 
 ## Execution options

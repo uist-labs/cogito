@@ -1,4 +1,4 @@
-# COGITO uv Migration — Design Spec
+# COGITO uv Migration - Design Spec
 
 - **Date:** 2026-07-09
 - **Status:** Proposed (awaiting review)
@@ -17,7 +17,7 @@ a front door that does not lie about what it needs.
 This spec covers the **uv migration spine** only. It makes COGITO *modern and
 reproducible* and leaves clean seams for the TUI installer that follows immediately
 after (its own spec). It deliberately does **not** build hardware auto-detection, a
-model catalog, or space/VRAM-fit checks — those are the TUI's heart.
+model catalog, or space/VRAM-fit checks - those are the TUI's heart.
 
 The design leans on llama.cpp/GGUF's breadth (old NVIDIA, CPU, Apple Silicon, AMD)
 as the adoption story: "runs on the laptop you already have."
@@ -54,14 +54,14 @@ The engine (`cogito.py` loop behavior) is **untouched**, consistent with prior w
 
 `main` (`06b93bb`, the merged onboarding-cleanup floor) has:
 
-- `cogito.py` — single module, ~750 lines, `def main()` + argparse (line 751),
+- `cogito.py` - single module, ~750 lines, `def main()` + argparse (line 751),
   lazy `llama_cpp` import (so `--help`, visualizers, demo run without the GPU dep).
-- `visualize.py`, `visualize_advanced.py` — matplotlib visualizers (Agg, headless-safe).
-- `requirements.txt` — `llama-cpp-python`, `numpy`, `matplotlib`.
-- `setup.sh` — bash: creates a `.venv`, `pip install`s deps (correct `-DGGML_CUDA=on`
+- `visualize.py`, `visualize_advanced.py` - matplotlib visualizers (Agg, headless-safe).
+- `requirements.txt` - `llama-cpp-python`, `numpy`, `matplotlib`.
+- `setup.sh` - bash: creates a `.venv`, `pip install`s deps (correct `-DGGML_CUDA=on`
   CUDA flag), then an interactive model download with **hardcoded TheBloke URLs and no
   space check**. Also NVIDIA-or-CPU only.
-- `examples/demo_run` + `generate_demo_data.py` — zero-GPU synthetic demo.
+- `examples/demo_run` + `generate_demo_data.py` - zero-GPU synthetic demo.
 
 **Weak points this spec fixes:** bash/venv install (vs uv), no lockfile, model download
 that assumes a high-end card and hardcodes soon-stale URLs, NVIDIA-or-CPU-only framing.
@@ -70,9 +70,9 @@ that assumes a high-end card and hardcodes soon-stale URLs, NVIDIA-or-CPU-only f
 
 ## 4. Design
 
-### 4.1 Packaging — flat layout + pyproject + uv.lock + entry points
+### 4.1 Packaging - flat layout + pyproject + uv.lock + entry points
 
-Keep the flat layout (no `src/` restructure — the engine stays put). Add:
+Keep the flat layout (no `src/` restructure - the engine stays put). Add:
 
 - `pyproject.toml` with `[project]` metadata, `requires-python = ">=3.10"` (3.9 is EOL;
   `uv` can provision the interpreter via `uv python install`, so this floor does not
@@ -89,15 +89,15 @@ Keep the flat layout (no `src/` restructure — the engine stays put). Add:
 
 Rationale: gives a clean `cogito` command (serves the visibility goal) with near-zero
 churn to working code. A `src/` package is only warranted if COGITO is ever published
-to PyPI, and even then the flat→src migration is cheap — so we do not pay for it now.
+to PyPI, and even then the flat→src migration is cheap - so we do not pay for it now.
 
-### 4.2 Dependency architecture — hybrid (verified 2026-07-09)
+### 4.2 Dependency architecture - hybrid (verified 2026-07-09)
 
-**Tier 1 — locked pure-Python core.** `numpy`, `matplotlib` declared as project
+**Tier 1 - locked pure-Python core.** `numpy`, `matplotlib` declared as project
 dependencies and pinned in `uv.lock`. Universal, reproducible, PyPI-sourced (robust,
 unaffected by any third-party index availability). `uv sync` installs this.
 
-**Tier 2a — wheel-served backends as locked uv extras (the common path).**
+**Tier 2a - wheel-served backends as locked uv extras (the common path).**
 llama-cpp-python is now published as **`py3-none` ABI-agnostic wheels** (ctypes-based;
 one wheel per backend covers every Python 3.x) at the abetlen GitHub Pages index,
 current within ~1 day of each source release (0.3.33 as of this writing). Backends with
@@ -122,10 +122,10 @@ declared dependency, not an out-of-lock install.
 Chosen to cover the common hardware without listing every published CUDA point release;
 extensible. (`hip-radeon` and additional `cuXXX` are one-line additions.)
 
-**Tier 2b — source-build escape hatch (documented, not the default path).** For hosts
-the wheels do not serve — **EL9 / glibc < 2.35** (CUDA & ROCm wheels are
+**Tier 2b - source-build escape hatch (documented, not the default path).** For hosts
+the wheels do not serve - **EL9 / glibc < 2.35** (CUDA & ROCm wheels are
 `manylinux_2_35`; CPU & Vulkan wheels are `manylinux2014` and run anywhere), SYCL,
-custom GPU-arch builds — document the source build:
+custom GPU-arch builds - document the source build:
 
 ```
 # CUDA example; swap the flag per backend (see backend catalog)
@@ -135,7 +135,7 @@ CMAKE_ARGS="-DGGML_CUDA=on" \
 uv pip install llama-cpp-python -C cmake.args="-DGGML_CUDA=on"
 ```
 
-No `--no-build-isolation` needed — uv builds in an isolated PEP 517 env and
+No `--no-build-isolation` needed - uv builds in an isolated PEP 517 env and
 scikit-build-core auto-provisions `cmake`/`ninja`. Host must supply a C/C++ toolchain
 and the backend SDK (nvcc for CUDA, ROCm/HIP toolchain, Vulkan SDK). `FORCE_CMAKE=1`
 is vestigial under scikit-build-core and can be dropped.
@@ -164,10 +164,10 @@ not an SLA. It only ever affects the optional `--extra <backend>`; the core lock
 PyPI-sourced and unaffected. Our own hosts (AL10 = glibc 2.39, RunPod) satisfy the
 `manylinux_2_35` wheels.
 
-### 4.3 Backend catalog — single-source-of-truth module (TUI seam)
+### 4.3 Backend catalog - single-source-of-truth module (TUI seam)
 
 A small Python data module (e.g., `cogito_backends.py`) holds the curated backend
-table as code — one record per backend:
+table as code - one record per backend:
 
 ```
 name         # human label, e.g. "NVIDIA CUDA 12.4"
@@ -179,13 +179,13 @@ kind         # "wheel" | "source"
 notes        # short guidance
 ```
 
-This is **code-as-config in git** (compliant with the runtime-first principle — no
+This is **code-as-config in git** (compliant with the runtime-first principle - no
 config file read at runtime). It is the single source consumed by: (a) README matrix
-generation / docs, and (b) the future TUI's detect-and-recommend logic — so the TUI
+generation / docs, and (b) the future TUI's detect-and-recommend logic - so the TUI
 never re-hardcodes the list. Extra names are chosen to equal the detector keys the TUI
 will produce (`cu124`, `metal`, `cpu`, …), so `uv sync --extra <key>` is a clean handoff.
 
-### 4.4 setup.sh — slim uv bootstrap stub (TUI seam)
+### 4.4 setup.sh - slim uv bootstrap stub (TUI seam)
 
 Reduce `setup.sh` to a dependency-free (bash-only) bootstrap:
 
@@ -195,7 +195,7 @@ Reduce `setup.sh` to a dependency-free (bash-only) bootstrap:
 3. Print concise next steps: the per-backend `--extra` options, how to get a model
    (README pointer), and "watch the demo right now, no GPU: `uv run cogito-viz examples/demo_run`".
 
-Deliberately **dumb on hardware** — no backend auto-detection. Structured so the TUI can
+Deliberately **dumb on hardware** - no backend auto-detection. Structured so the TUI can
 later become the thing `setup.sh` launches. Not polished, by intent.
 
 ### 4.5 README rewrite
@@ -205,7 +205,7 @@ later become the thing `setup.sh` launches. Not polished, by intent.
 - Replace the `pip install` quick start with the uv flow (`uv sync` / `uv sync --extra <backend>`).
 - Add a **hardware-support matrix** (backend → install command → wheel/source → glibc note),
   generated from / consistent with the backend catalog. Sell the breadth.
-- Add a **"Getting a model"** section (generic guidance — where GGUFs live, quant vs size
+- Add a **"Getting a model"** section (generic guidance - where GGUFs live, quant vs size
   tradeoff) replacing the removed interactive download. Kept minimal so the TUI catalog
   supersedes it cleanly.
 - Keep the "Running on RunPod" prebuilt-wheel guidance, updated to the current index.
@@ -237,11 +237,11 @@ task, tracked separately.
 
 ## 6. Risks & Open Questions
 
-- **abetlen index availability** — mitigated: optional-extra-only; core lock is PyPI.
-- **glibc gate on non-AL10 users** — mitigated: documented, with the source-build hatch.
-- **Curated extras list churn** as new CUDA releases land — low; single-line additions,
+- **abetlen index availability** - mitigated: optional-extra-only; core lock is PyPI.
+- **glibc gate on non-AL10 users** - mitigated: documented, with the source-build hatch.
+- **Curated extras list churn** as new CUDA releases land - low; single-line additions,
   and the catalog module centralizes them.
-- **Resolved (review):** initial curated extras set confirmed — `cpu`, `cu124`, `cu130`,
+- **Resolved (review):** initial curated extras set confirmed - `cpu`, `cu124`, `cu130`,
   `metal`, `vulkan`, `rocm72` (adjust later if needed).
 - **Resolved (review):** `visualize_advanced.py` **promoted** to a `cogito-viz-advanced`
   entry point now (ease-of-use → traction; trivial cost).

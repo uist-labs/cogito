@@ -1,4 +1,4 @@
-# COGITO Installer — Shell + Backend Screen — Design Spec
+# COGITO Installer - Shell + Backend Screen - Design Spec
 
 - **Date:** 2026-07-09
 - **Status:** Proposed (awaiting review)
@@ -9,8 +9,8 @@
 
 ## 1. Goal & Why
 
-Give COGITO a **guided terminal installer** so a newcomer to AI/ML — the motivating
-user is a friend Ken is onboarding, and any GitHub passer-by — goes from a fresh clone
+Give COGITO a **guided terminal installer** so a newcomer to AI/ML - the motivating
+user is a friend Ken is onboarding, and any GitHub passer-by - goes from a fresh clone
 to the correct `llama-cpp-python` backend installed, without reading the hardware-support
 matrix or knowing what `cu124` means. Today that step is manual: the user must read the
 README, decide which `uv sync --extra <backend>` matches their hardware, and remember the
@@ -19,7 +19,7 @@ backend step.
 
 This is **session 1 of a three-session roadmap** toward a full "zero-to-running-loop"
 front door. It builds the interactive **wizard frame** (the walking skeleton) plus one
-fully-working screen — hardware detection, backend recommendation, and install — so the
+fully-working screen - hardware detection, backend recommendation, and install - so the
 whole architecture is proven end-to-end before later screens are added.
 
 **The roadmap (each its own spec -> plan -> build cycle):**
@@ -41,9 +41,9 @@ seams for steps 2-3.
 
 - A Python **stdlib-only** guided-wizard frame, registered as the `cogito-install`
   console entry point, launched by `setup.sh` after the core sync.
-- `cogito_detect.py` — pure, side-effect-free hardware probing returning a structured
-  `Detection`. No cogito coupling (designed to be lift-ready for reuse — see 4.6).
-- `cogito_install.py` — the wizard: recommendation mapping, confirm/override prompt,
+- `cogito_detect.py` - pure, side-effect-free hardware probing returning a structured
+  `Detection`. No cogito coupling (designed to be lift-ready for reuse - see 4.6).
+- `cogito_install.py` - the wizard: recommendation mapping, confirm/override prompt,
   install execution, re-run/switch-backend handling.
 - The **detect -> recommend-with-rationale -> confirm/override** interaction: auto-detect
   the best match, show what was found and why, preselect it as the Enter-default, keep the
@@ -56,11 +56,11 @@ seams for steps 2-3.
 
 **Out of scope (deferred):**
 
-- The **model picker** (curated GGUF catalog, VRAM-fit, download) — session 2.
-- The **first-run launcher** (genesis type + cycles, launching the loop) — session 3.
+- The **model picker** (curated GGUF catalog, VRAM-fit, download) - session 2.
+- The **first-run launcher** (genesis type + cycles, launching the loop) - session 3.
 - **Discoverability/publish** (GitHub topics like beautifulyze, README polish, merge to
-  main, tag release) — session 3.
-- **Auto-installing the build toolchain / GPU SDK** — deliberately never done; it crosses
+  main, tag release) - session 3.
+- **Auto-installing the build toolchain / GPU SDK** - deliberately never done; it crosses
   the sudo/security boundary and is not portably automatable (see 4.4).
 - Any full-screen / curses TUI. "TUI" here means a linear guided wizard, by design.
 
@@ -72,19 +72,19 @@ The engine (`cogito.py` loop) is untouched.
 
 On `claude/uv-migration` (`1e90c8d`), which is **merged to `origin/main`** (fast-forward;
 `origin/main` tip == `1e90c8d`). This local clone's `main` is stale at `06b93bb` (10 behind,
-never pulled) — a `git pull` before publish is all that is needed:
+never pulled) - a `git pull` before publish is all that is needed:
 
-- `setup.sh` — thin bash bootstrap: ensure `uv`, `uv sync` the core (numpy/matplotlib),
+- `setup.sh` - thin bash bootstrap: ensure `uv`, `uv sync` the core (numpy/matplotlib),
   print manual next steps (per-backend `--extra` options + model pointer). Deliberately
   dumb on hardware.
-- `cogito_backends.py` — the single-source-of-truth catalog: six `Backend` records
+- `cogito_backends.py` - the single-source-of-truth catalog: six `Backend` records
   (`cpu`, `cu124`, `cu130`, `metal`, `vulkan`, `rocm72`), each with `key` (== `uv` extra ==
   detector key), `index_url`, `cmake_flag` (source fallback), `min_glibc`, `notes`. Its
   docstring explicitly names "the forthcoming TUI installer's hardware detection and
   recommendation" as its consumer.
-- `pyproject.toml` — mutually-exclusive backend extras, each pinned to its abetlen wheel
+- `pyproject.toml` - mutually-exclusive backend extras, each pinned to its abetlen wheel
   index; console scripts `cogito`, `cogito-viz`, `cogito-viz-advanced`.
-- README — documents the manual `uv sync --extra <backend>` step, a "switching backends?"
+- README - documents the manual `uv sync --extra <backend>` step, a "switching backends?"
   reinstall-flag dance, and flags a guided model picker as future work.
 
 **What this spec adds:** the detection + recommendation + install logic the catalog was
@@ -114,7 +114,7 @@ Three flat modules (matching the repo's single-module convention):
 |------|----------------|------------|
 | `cogito_detect.py` | Pure hardware probing -> a structured `Detection` (platform, GPU vendor, CUDA/ROCm availability + version, glibc). **No install side-effects, no user I/O.** | stdlib only |
 | `cogito_install.py` | The wizard: `Detection` -> recommended `Backend`, render confirm/override prompt, run the install, handle re-run/switch. The `cogito-install` console script. | `cogito_detect`, `cogito_backends`, stdlib |
-| `cogito_backends.py` | *(existing)* the catalog — unchanged, consumed as intended | — |
+| `cogito_backends.py` | *(existing)* the catalog - unchanged, consumed as intended | - |
 
 The seam that makes this testable: **detection is pure**, so it is unit-tested by feeding
 synthetic probe outputs and asserting the recommendation; the **wizard owns all the
@@ -147,7 +147,7 @@ First match wins, conservative on uncertainty:
    - **CC < 7.5** (Maxwell/Pascal/Volta) -> **`cu124`**, always. CUDA 13 removed
      offline-compile + library support for these arches, so a `cu130` wheel contains no
      code for them and cannot JIT down (PTX is forward-compatible only). *(This is the
-     GTX 1070 / Pascal CC 6.1 case — the wks1 dev box.)*
+     GTX 1070 / Pascal CC 6.1 case - the wks1 dev box.)*
    - **CC >= 7.5** (Turing+) -> `cu130` if the driver supports the CUDA 13 runtime, else
      `cu124`.
    - **compute_cap unreadable** (ancient driver lacking the field) -> conservative `cu124`.
@@ -159,7 +159,7 @@ First match wins, conservative on uncertainty:
 6. Anything else / all-unknown -> `cpu`.
 
 Every recommendation carries a short human rationale string the wizard prints verbatim
-("Found an NVIDIA GPU; driver supports CUDA 12.4; glibc 2.35 meets the 2.35 floor —
+("Found an NVIDIA GPU; driver supports CUDA 12.4; glibc 2.35 meets the 2.35 floor -
 recommending cu124").
 
 ### 4.3 Wizard UX flow
@@ -191,14 +191,14 @@ Flow rules:
 
 - **Enter = accept the recommendation.** A newcomer types nothing and gets the right thing.
 - The full catalog is always reachable (recommended floated to top; `more...` reveals the
-  rest), so an informed user can override — including deliberately choosing a backend that
+  rest), so an informed user can override - including deliberately choosing a backend that
   triggers the source-build path.
 - After a choice, a one-line **confirmation of the actual command** before it runs:
   `Running: uv sync --extra cu124` (or the reinstall variant when switching). Consequential
   action, shown before it happens.
-- **Progress is streamed, not hidden** — `uv sync` output flows through so a long wheel
+- **Progress is streamed, not hidden** - `uv sync` output flows through so a long wheel
   download visibly heartbeats.
-- On success, the screen ends by **pointing forward** — the same "now get a model, then
+- On success, the screen ends by **pointing forward** - the same "now get a model, then
   run" next-steps `setup.sh` prints today. Sessions 2-3 replace those printed next-steps
   with real screens.
 
@@ -213,7 +213,7 @@ e.g. an EL9 box) or the user overrides to a backend needing a source build, the 
 offers **two** options: the safe `cpu` default, and "build the GPU backend from source."
 If the build is chosen:
 
-1. **Pre-flight the toolchain** — check for a C/C++ compiler, `cmake`, `make`/`ninja`, and
+1. **Pre-flight the toolchain** - check for a C/C++ compiler, `cmake`, `make`/`ninja`, and
    the backend SDK keyed off the chosen backend (`nvcc` for CUDA, `hipcc` for ROCm, Vulkan
    headers), using the catalog's `cmake_flag`.
 2. **Missing prereqs -> stop clean.** Do not start a doomed build. Print exactly what is
@@ -221,10 +221,10 @@ If the build is chosen:
    (e.g. `sudo dnf install gcc-c++ cmake ninja-build` on EL, `brew install cmake ninja` on
    macOS); for the CUDA/ROCm SDK specifically, link the vendor's official installer rather
    than guessing. Then fall back to offering `cpu`. **The privileged install stays a
-   deliberate human action** — the wizard never runs `sudo` or adds vendor repos itself
+   deliberate human action** - the wizard never runs `sudo` or adds vendor repos itself
    (crosses the security boundary; not portably automatable; out of scope).
 3. **Prereqs present -> confirm explicitly** ("This compiles llama-cpp-python locally,
-   takes several minutes, needs network + the CUDA toolkit — proceed?"), then run
+   takes several minutes, needs network + the CUDA toolkit - proceed?"), then run
    `CMAKE_ARGS="<cmake_flag>" uv pip install llama-cpp-python --reinstall-package
    llama-cpp-python --no-cache` with **live streamed output**.
 4. **Success -> `uv sync --inexact`** so uv does not clobber the hand-built wheel (the
@@ -241,17 +241,17 @@ failure mode lands somewhere that works.
 Per the no-on-disk-runtime-config rule, behavior is controlled by flags (which also make
 the wizard scriptable and testable):
 
-- `cogito-install --backend <key>` — skip detection, install a named backend.
-- `--yes` — accept the recommendation non-interactively (scriptable installs; CI).
-- `--dry-run` — print the exact command(s) and exit without touching the environment.
+- `cogito-install --backend <key>` - skip detection, install a named backend.
+- `--yes` - accept the recommendation non-interactively (scriptable installs; CI).
+- `--dry-run` - print the exact command(s) and exit without touching the environment.
 
 ### 4.6 Reuse note (future, not built now)
 
-`cogito_detect.py` — "what GPU is this, which CUDA/ROCm version, what glibc" — is generic
+`cogito_detect.py` - "what GPU is this, which CUDA/ROCm version, what glibc" - is generic
 infrastructure, not cogito-specific. It is a **candidate shared module** for other UIST
 GPU-backend projects (the poker trainer's RunPod image, MythCast, future llama-cpp
 consumers). It is deliberately built **lift-ready** (pure, stdlib-only, no cogito imports)
-but **not extracted** — a shared package before a second real consumer is premature
+but **not extracted** - a shared package before a second real consumer is premature
 abstraction. **Trigger to revisit:** the second GPU-backend project that reaches for it.
 
 ---
@@ -266,7 +266,7 @@ Three layers, matching the pure/injectable seams:
    note, AMD+ROCm -> rocm72, AMD-without-ROCm -> vulkan, all-unknown -> cpu, and the
    compute-capability cu124-vs-cu130 split. **Regression fixture (locked):** a
    Pascal/CC-6.1 detection with driver max-CUDA 13.0 (the real wks1 GTX 1070) must
-   recommend **`cu124`**, not `cu130` — this is the case the original driver-version rule
+   recommend **`cu124`**, not `cu130` - this is the case the original driver-version rule
    got wrong. Paired with a Turing+/CC-7.5+ fixture that correctly yields `cu130`. No
    hardware needed.
 2. **Probe parsing.** Fixture-driven tests feed captured `nvidia-smi` / glibc / `platform`
@@ -279,7 +279,7 @@ Three layers, matching the pure/injectable seams:
    exercises the same path end-to-end.
 
 **Coverage (trust-but-verify):** the mapping and parsers are fully unit-tested via
-fixtures. **Live NVIDIA validation is now possible** — the wks1 dev box's GTX 1070 driver
+fixtures. **Live NVIDIA validation is now possible** - the wks1 dev box's GTX 1070 driver
 is installed (580.173.02, driver max-CUDA 13.0, compute_cap 6.1), so this session can
 exercise the real `cu124` path end-to-end: detect -> recommend `cu124` (the Pascal case)
 -> `uv sync --extra cu124` -> load a small GGUF with GPU offload and confirm the kernels
@@ -292,21 +292,21 @@ it does not have for those.
 
 ## 6. Risks & Open Questions
 
-- **Detection false-positives** (e.g. GPU present but driver/runtime broken) — mitigated by
+- **Detection false-positives** (e.g. GPU present but driver/runtime broken) - mitigated by
   the confirm/override prompt (the recommendation is never silently acted on) and the
   conservative-on-uncertainty mapping.
-- **cu124-vs-cu130 misclassification** — the discriminator is the GPU's **compute
+- **cu124-vs-cu130 misclassification** - the discriminator is the GPU's **compute
   capability**, not driver max-CUDA (CUDA 13 dropped pre-Turing arches; the driver ceiling
   is a runtime ceiling, not a build-target guarantee). CC < 7.5 -> `cu124`; unreadable
   compute_cap -> conservative `cu124`. Locked by the Pascal/CC-6.1 regression fixture.
   *Residual open question:* whether the abetlen `cu124` wheel ships Pascal (sm_61) SASS or
-  only newer-arch PTX — resolved empirically by the live 1070 offload run (see §5).
-- **Source build failing on a newcomer's box** — mitigated by pre-flight, explicit
+  only newer-arch PTX - resolved empirically by the live 1070 offload run (see §5).
+- **Source build failing on a newcomer's box** - mitigated by pre-flight, explicit
   confirmation, streamed output, and always-fall-back-to-`cpu`.
-- **Live validation now unblocked** — the dev box's 1070 driver is installed, so the
+- **Live validation now unblocked** - the dev box's 1070 driver is installed, so the
   `cu124`/Pascal path gets a real end-to-end check this session (see §5). Non-NVIDIA and
   Turing+ paths remain fixture-only.
 - **Local clone's `main` is stale** (`06b93bb`, 10 behind). The uv spine **is** merged on
   `origin/main` (@ `1e90c8d`); this branch is based on `1e90c8d` (== `origin/main` tip), so it
   stacks correctly on merged content. A `git pull` on local `main` before publish is all that
-  is needed — no reconciliation.
+  is needed - no reconciliation.

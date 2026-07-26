@@ -1,9 +1,9 @@
-# COGITO Installer — Shell + Backend Screen — Implementation Plan
+# COGITO Installer - Shell + Backend Screen - Implementation Plan
 
 Companion to `2026-07-09-installer-backend-screen-design.md`. Execute on branch
 `claude/installer-backend` in `/mnt/usb-single-1/dev/cogito` (the fapolicyd-sane dev zone;
 home is noexec). Tasks are ordered; each is independently verifiable. The pure logic
-(recommendation mapping, probe parsers) is written **test-first** — it is the crown jewel
+(recommendation mapping, probe parsers) is written **test-first** - it is the crown jewel
 and needs no hardware. Side effects (subprocess, `uv sync`, stdin) are injected/mocked so
 the suite runs green on the dev box without touching the environment.
 
@@ -20,7 +20,7 @@ Verified facts (2026-07-09):
 
 ---
 
-## Task 1 — `cogito_detect.py`: `Detection` type + pure probe parsers (test-first)
+## Task 1 - `cogito_detect.py`: `Detection` type + pure probe parsers (test-first)
 
 **Goal:** the pure `parse-text -> value` layer and the immutable `Detection` record. No
 subprocess, no user I/O.
@@ -50,7 +50,7 @@ subprocess, no user I/O.
 
 ---
 
-## Task 2 — `cogito_detect.py`: probe runners + `detect()` orchestrator
+## Task 2 - `cogito_detect.py`: probe runners + `detect()` orchestrator
 
 **Goal:** the thin `run-command -> text` layer and `detect() -> Detection`.
 
@@ -75,17 +75,17 @@ dev box: `uv run python -c "import cogito_detect as d; print(d.detect())"` shows
 
 ---
 
-## Task 3 — `recommend()` mapping + Pascal regression fixture (test-first, crown jewel)
+## Task 3 - `recommend()` mapping + Pascal regression fixture (test-first, crown jewel)
 
 **Goal:** the pure `recommend(detection) -> (backend_key, rationale, caveats)` decision.
 
-**Files:** `cogito_detect.py` (or a sibling `cogito_recommend.py` — keep in `cogito_detect`
+**Files:** `cogito_detect.py` (or a sibling `cogito_recommend.py` - keep in `cogito_detect`
 for now, one import); add `tests/test_recommend.py`.
 
 **Steps (tests first):** encode the §4.2 ordered rules. Table-driven cases asserting
 `(key, caveat-flags)` for every branch:
 - Darwin+arm64 -> `metal`.
-- **NVIDIA CC 6.1 (Pascal) + driver max-CUDA 13.0 + glibc 2.39 -> `cu124`** — the locked
+- **NVIDIA CC 6.1 (Pascal) + driver max-CUDA 13.0 + glibc 2.39 -> `cu124`** - the locked
   regression case (the wks1 1070; the rule the driver-version approach got wrong).
 - NVIDIA CC 8.6 (Turing+) + driver CUDA 13 + glibc 2.35 -> `cu130`.
 - NVIDIA CC 8.6 + driver max-CUDA 12.x -> `cu124`.
@@ -103,7 +103,7 @@ Rationale strings are asserted to mention the deciding signal (e.g. "compute cap
 
 ---
 
-## Task 4 — `cogito_install.py`: wizard core (render, choice, injected runner, flags)
+## Task 4 - `cogito_install.py`: wizard core (render, choice, injected runner, flags)
 
 **Goal:** the interactive screen + the `cogito-install` entry point, with all side effects
 injected.
@@ -117,7 +117,7 @@ injected.
 - Render: detected-hardware summary + recommended backend + verbatim rationale + the menu
   (recommended floated to top, `more...` reveals the rest), all ASCII-only.
 - Choice parse: Enter -> recommended; number -> that backend; invalid -> re-prompt.
-- **Injected runner** `run_sync(cmd, *, dry_run)` — the single side-effect seam. Prints
+- **Injected runner** `run_sync(cmd, *, dry_run)` - the single side-effect seam. Prints
   `Running: <cmd>` before executing; streams output (no capture). `--dry-run` prints and
   returns without executing.
 - Switch-backend: if a backend extra is already installed, note it and append
@@ -137,7 +137,7 @@ on the dev box prints the detected 1070, recommends `cu124`, and shows
 
 ---
 
-## Task 5 — guarded source-build path
+## Task 5 - guarded source-build path
 
 **Goal:** offer-first, pre-flighted, confirmed source build for GPU-on-old-glibc / unlisted
 backends, always falling back to `cpu`.
@@ -164,15 +164,15 @@ backends, always falling back to `cpu`.
   assert the success path issues the `CMAKE_ARGS=... uv pip install` then
   `uv sync --inexact`; assert build-failure falls back to `cpu`.
 
-**Verify:** `uv run pytest tests/test_source_build.py -q` green. (No live old-glibc box —
-this path is fixture + `--dry-run` only, stated honestly in the design §5.)
+**Verify:** `uv run pytest tests/test_source_build.py -q` green. (No live old-glibc
+box - this path is fixture + `--dry-run` only, stated honestly in the design §5.)
 
 **Done when:** every source-build branch is covered and each dead-ends into a working
 fallback.
 
 ---
 
-## Task 6 — `setup.sh` handoff + CHANGELOG
+## Task 6 - `setup.sh` handoff + CHANGELOG
 
 **Goal:** wire the wizard into the front door; record the change.
 
@@ -191,9 +191,9 @@ fallback.
 
 ---
 
-## Task 7 — live hardware validation (the ground-truth check) + full suite
+## Task 7 - live hardware validation (the ground-truth check) + full suite
 
-**Goal:** prove the compute-capability rule on real Pascal silicon — the thing the driver
+**Goal:** prove the compute-capability rule on real Pascal silicon - the thing the driver
 install just unblocked.
 
 **Files:** none (validation); note results in the CHANGELOG / a short log.
@@ -211,8 +211,8 @@ install just unblocked.
 
 **Verify:** GPU offload visible in the llama.cpp load log on the 1070; full pytest green.
 
-**Done when:** the Pascal/`cu124` path is proven end-to-end on real hardware, or — if the
-wheel turns out not to support Pascal — the finding is recorded and the recommendation
+**Done when:** the Pascal/`cu124` path is proven end-to-end on real hardware, or - if the
+wheel turns out not to support Pascal - the finding is recorded and the recommendation
 adjusted (e.g. steer Pascal to `cpu` or a source build) with a follow-up.
 
 ---
@@ -221,15 +221,15 @@ adjusted (e.g. steer Pascal to `cpu` or a source build) with a follow-up.
 
 - Task 1 first (types + parsers). Task 2 depends on 1. Task 3 depends on 1's `Detection`.
 - Task 4 depends on 2 + 3. Task 5 extends 4. Task 6 depends on 4. Task 7 depends on all.
-- Riskiest: **Task 3** (the rule must be exactly right — Task 1's Pascal fixture is the
+- Riskiest: **Task 3** (the rule must be exactly right - Task 1's Pascal fixture is the
   guard) and **Task 7** (the live wheel/Pascal unknown; has a defined fallback if it fails).
 
 ## Execution options
 
-- **Solo (Claude), test-first, per-task commits** to `claude/installer-backend` — the
+- **Solo (Claude), test-first, per-task commits** to `claude/installer-backend` - the
   default. Pure cores (Tasks 1/3) get tests before code.
-- Subagent-driven (superpowers:subagent-driven-development), one agent per task with review
-  — reasonable given the clean task seams.
+- Subagent-driven (superpowers:subagent-driven-development), one agent per task with
+  review - reasonable given the clean task seams.
 - Fable for none of these specifically; the logic is well-scoped for Opus.
 
 Commit per task to the feature branch (standing OK). Push / PR / merge to `main`, and the
