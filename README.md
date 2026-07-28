@@ -81,7 +81,7 @@ COGITO uses [uv](https://docs.astral.sh/uv/) for a fast, reproducible setup.
 
 ```bash
 # Clone
-git clone https://github.com/uistlabs/cogito.git
+git clone https://github.com/uist-labs/cogito.git
 cd cogito
 
 # One-command setup: installs uv if needed, builds the core environment,
@@ -191,7 +191,7 @@ matches the pod (check with `nvcc --version`):
 **Fast path - prebuilt CUDA wheel (no compile):**
 
 ```bash
-git clone https://github.com/uistlabs/cogito.git && cd cogito
+git clone https://github.com/uist-labs/cogito.git && cd cogito
 uv sync --extra cu124        # or cu130, matching the pod's CUDA
 uv run cogito --model ./model.gguf --genesis-type mirror --cycles 50
 ```

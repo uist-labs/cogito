@@ -39,8 +39,8 @@ cogito-model = "cogito_modelpick:main"
 cogito-run = "cogito_launch:main"
 
 [project.urls]
-Homepage = "https://github.com/uistlabs/cogito"
-Repository = "https://github.com/uistlabs/cogito"
+Homepage = "https://github.com/uist-labs/cogito"
+Repository = "https://github.com/uist-labs/cogito"
 
 # Backend extras: pick exactly one, e.g. `uv sync --extra cpu`. Each pins
 # llama-cpp-python to its pre-built abetlen wheel index (see [tool.uv.sources] /
